@@ -1,113 +1,112 @@
 <template>
-  <div class="max-w-4xl mx-auto px-6 py-8">
-    <div v-if="topic" class="animate-fade-in">
-      <!-- 返回链接 -->
-      <router-link 
-        to="/" 
-        class="inline-flex items-center gap-2 text-slate-500 hover:text-amber-500 transition mb-6"
-      >
-        <span>←</span> 返回首页
-      </router-link>
-      
+  <div class="min-h-screen bg-gray-50">
+    <!-- 导航栏 -->
+    <nav class="bg-white border-b border-gray-200 sticky top-0 z-50">
+      <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+        <router-link to="/" class="flex items-center gap-2 text-gray-600 hover:text-gray-800 transition">
+          <span>←</span>
+          <span>返回热榜</span>
+        </router-link>
+        <div class="flex items-center gap-2 text-gray-400 text-sm">
+          <span>🔥</span>
+          <span>知枢热榜</span>
+        </div>
+      </div>
+    </nav>
+
+    <div class="max-w-4xl mx-auto px-6 py-8" v-if="topic">
       <!-- 热点卡片 -->
-      <div class="bg-white rounded-2xl shadow-card overflow-hidden">
-        <!-- 热度条 -->
-        <div class="h-2 bg-gradient-to-r from-amber-400 via-orange-500 to-red-500"></div>
+      <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
+        <!-- 头部：平台 + 排名 -->
+        <div class="px-8 py-6 border-b border-gray-100 flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <span class="text-2xl">{{ topic.platform_icon }}</span>
+            <span class="text-lg font-medium text-gray-800">{{ topic.platform_name }}</span>
+            <span class="px-3 py-1 bg-orange-100 text-orange-600 rounded-full text-sm font-medium">
+              热榜 #{{ topic.rank }}
+            </span>
+          </div>
+          <span class="text-sm text-gray-400">{{ topic.category_icon }} {{ topic.category_name }}</span>
+        </div>
         
-        <div class="p-8">
-          <!-- 头部信息 -->
-          <div class="flex items-start justify-between mb-6">
+        <!-- 标题 -->
+        <div class="px-8 py-6">
+          <h1 class="text-2xl font-bold text-gray-900 leading-relaxed">{{ topic.title }}</h1>
+        </div>
+        
+        <!-- 热度数据 -->
+        <div class="px-8 py-6 bg-gradient-to-r from-orange-50 to-red-50 border-y border-gray-100">
+          <div class="flex items-center gap-8">
             <div>
-              <div class="flex items-center gap-3 mb-3">
-                <span class="px-3 py-1.5 bg-amber-100 text-amber-600 rounded-lg font-medium">
-                  {{ topic.platform_icon }} {{ topic.platform_name }}
-                </span>
-                <span class="text-slate-400">#{{ topic.rank }}</span>
+              <p class="text-sm text-gray-500 mb-1">热度指数</p>
+              <p class="text-3xl font-bold text-orange-500">{{ formatHotValue(topic.hot_value) }}</p>
+            </div>
+            <div class="flex-1">
+              <p class="text-sm text-gray-500 mb-2">热度趋势</p>
+              <div class="h-3 bg-white rounded-full overflow-hidden shadow-inner">
+                <div 
+                  class="h-full bg-gradient-to-r from-orange-400 to-red-500 rounded-full"
+                  :style="{ width: '100%' }"
+                ></div>
               </div>
-              <h1 class="text-2xl font-bold text-slate-800 leading-snug">{{ topic.title }}</h1>
             </div>
-          </div>
-          
-          <!-- 热度值 -->
-          <div class="flex items-center gap-4 mb-6 p-4 bg-gradient-to-r from-amber-50 to-orange-50 rounded-xl">
-            <div class="flex-1">
-              <p class="text-sm text-slate-500 mb-1">热度值</p>
-              <p class="text-3xl font-bold text-amber-500">{{ formatHotValue(topic.hot_value) }}</p>
-            </div>
-            <div class="w-px h-12 bg-amber-200"></div>
-            <div class="flex-1">
-              <p class="text-sm text-slate-500 mb-1">平台排名</p>
-              <p class="text-3xl font-bold text-slate-700">#{{ topic.rank }}</p>
-            </div>
-            <div class="w-px h-12 bg-amber-200"></div>
-            <div class="flex-1">
-              <p class="text-sm text-slate-500 mb-1">所属分类</p>
-              <p class="text-xl font-semibold text-slate-700">{{ topic.category_name }}</p>
-            </div>
-          </div>
-          
-          <!-- AI摘要 -->
-          <div v-if="topic.summary" class="mb-6 p-5 bg-slate-50 rounded-xl border border-slate-200">
-            <h3 class="font-semibold text-slate-700 mb-2 flex items-center gap-2">
-              <span>🤖</span> AI 智能摘要
-            </h3>
-            <p class="text-slate-600 leading-relaxed">{{ topic.summary }}</p>
-          </div>
-          
-          <!-- 外链按钮 -->
-          <div class="flex gap-4">
-            <a 
-              :href="topic.url"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="flex-1 py-4 bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-xl text-lg font-semibold flex items-center justify-center gap-2 hover:shadow-lg transition"
-            >
-              <span>🔗</span> 跳转原平台查看
-            </a>
-            <button 
-              class="px-6 py-4 bg-white text-slate-600 rounded-xl border border-slate-200 hover:border-amber-300 hover:bg-amber-50 transition font-medium flex items-center gap-2"
-            >
-              <span>❤️</span> 收藏
-            </button>
           </div>
         </div>
         
-        <!-- 底部装饰 -->
-        <div class="flex justify-center gap-2 py-3 bg-slate-50 opacity-40">
-          <div class="w-2 h-2 rounded-full bg-amber-300"></div>
-          <div class="w-2 h-2 rounded-full bg-orange-300"></div>
-          <div class="w-2 h-2 rounded-full bg-amber-300"></div>
+        <!-- AI摘要 -->
+        <div v-if="topic.summary" class="px-8 py-6 border-b border-gray-100">
+          <div class="flex items-center gap-2 mb-3">
+            <span class="text-lg">🤖</span>
+            <span class="font-medium text-gray-700">AI 智能摘要</span>
+          </div>
+          <p class="text-gray-600 leading-relaxed">{{ topic.summary }}</p>
+        </div>
+        
+        <!-- 操作按钮 -->
+        <div class="px-8 py-6 flex gap-4">
+          <a 
+            :href="topic.url"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="flex-1 py-3 bg-orange-500 text-white rounded-xl text-center font-medium hover:bg-orange-600 transition flex items-center justify-center gap-2"
+          >
+            <span>🔗</span> 跳转到 {{ topic.platform_name }} 查看
+          </a>
+          <button class="px-6 py-3 border border-gray-200 rounded-xl text-gray-600 hover:bg-gray-50 transition">
+            ❤️ 收藏
+          </button>
+          <button class="px-6 py-3 border border-gray-200 rounded-xl text-gray-600 hover:bg-gray-50 transition">
+            📤 分享
+          </button>
         </div>
       </div>
       
-      <!-- 相关热点（可选） -->
-      <div class="mt-8">
-        <h3 class="font-semibold text-slate-800 mb-4 flex items-center gap-2">
+      <!-- 相关热点 -->
+      <div class="mt-8" v-if="relatedTopics.length > 0">
+        <h3 class="font-medium text-gray-800 mb-4 flex items-center gap-2">
           <span>📌</span> 相关热点
         </h3>
-        <div class="grid grid-cols-2 gap-4">
+        <div class="bg-white rounded-xl shadow-sm overflow-hidden">
           <div 
             v-for="rel in relatedTopics" 
             :key="rel.id"
             @click="goToTopic(rel.id)"
-            class="bg-white rounded-xl shadow-card p-4 cursor-pointer hover:shadow-card-hover hover:-translate-y-1 transition"
+            class="px-6 py-4 border-b border-gray-100 last:border-0 hover:bg-gray-50 cursor-pointer transition flex items-center justify-between"
           >
-            <div class="flex items-center gap-2 mb-2">
-              <span class="text-xs text-slate-500">{{ rel.platform_name }}</span>
-              <span class="text-xs text-amber-500">🔥 {{ formatHotValue(rel.hot_value) }}</span>
+            <span class="text-gray-700 hover:text-orange-600 transition">{{ rel.title }}</span>
+            <div class="flex items-center gap-3 text-sm text-gray-400">
+              <span>{{ topic.platform_icon }}</span>
+              <span>{{ formatHotValue(rel.hot_value) }}</span>
             </div>
-            <p class="text-sm font-medium text-slate-700 line-clamp-2">{{ rel.title }}</p>
           </div>
         </div>
       </div>
     </div>
     
     <!-- 加载状态 -->
-    <div v-else class="text-center py-16">
-      <div class="w-20 h-20 rounded-2xl bg-slate-100 flex items-center justify-center text-4xl mx-auto mb-4 animate-pulse-slow">
-        🔥
-      </div>
-      <p class="text-slate-400">加载中...</p>
+    <div v-else class="text-center py-20">
+      <span class="text-4xl animate-pulse inline-block">🔥</span>
+      <p class="text-gray-400 mt-4">加载中...</p>
     </div>
   </div>
 </template>
@@ -124,6 +123,7 @@ interface Topic {
   platform_icon: string
   category_id: number
   category_name: string
+  category_icon: string
   hot_value: number
   rank: number
   url: string
@@ -152,11 +152,10 @@ const loadTopic = async () => {
     const res = await fetch(`/api/topics/${id}`)
     topic.value = await res.json()
     
-    // 加载相关热点
     if (topic.value) {
       const relatedRes = await fetch(`/api/topics?category=${topic.value.category_id}&sort=hot`)
       const allRelated = await relatedRes.json()
-      relatedTopics.value = allRelated.filter((t: any) => t.id !== topic.value!.id).slice(0, 4)
+      relatedTopics.value = allRelated.filter((t: any) => t.id !== topic.value!.id).slice(0, 5)
     }
   } catch (e) {
     console.error('Failed to load topic:', e)
@@ -167,12 +166,3 @@ onMounted(async () => {
   await loadTopic()
 })
 </script>
-
-<style scoped>
-.line-clamp-2 {
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-</style>

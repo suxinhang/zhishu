@@ -262,6 +262,7 @@ def get_topic(topic_id: int):
         "platform_icon": platform.icon if platform else "📱",
         "category_id": topic.category_id,
         "category_name": category.name if category else "其他",
+        "category_icon": category.icon if category else "📋",
         "hot_value": topic.hot_value,
         "rank": topic.rank,
         "url": topic.url,
