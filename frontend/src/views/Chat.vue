@@ -1,57 +1,115 @@
 <template>
-  <div class="max-w-4xl mx-auto px-4 py-8">
-    <!-- 智能体信息 -->
-    <div v-if="agent" class="bg-white rounded-xl shadow-md p-6 mb-6">
-      <div class="flex items-center gap-4">
-        <div class="w-12 h-12 rounded-full bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center text-2xl">
+  <div class="max-w-4xl mx-auto px-6 py-8">
+    <!-- 智能体信息卡片 -->
+    <div v-if="agent" class="animate-fade-in">
+      <!-- 返回链接 -->
+      <router-link 
+        :to="`/agent/${agent.id}`"
+        class="inline-flex items-center gap-2 text-slate-500 hover:text-zhishu-600 transition mb-6"
+      >
+        <span>←</span> 返回详情
+      </router-link>
+      
+      <!-- 智能体头部 -->
+      <div class="bg-white rounded-xl shadow-card p-4 mb-6 flex items-center gap-4">
+        <div class="w-14 h-14 rounded-xl bg-gradient-to-br from-zhishu-100 to-zhishu-50 flex items-center justify-center text-2xl shadow-inner">
           {{ agent.icon }}
         </div>
-        <div>
-          <h2 class="text-xl font-semibold text-gray-800">{{ agent.name }}</h2>
-          <p class="text-sm text-gray-500">{{ agent.description }}</p>
+        <div class="flex-1">
+          <h2 class="text-lg font-semibold text-slate-800">{{ agent.name }}</h2>
+          <p class="text-sm text-slate-500 truncate">{{ agent.description }}</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="px-3 py-1 bg-green-50 text-green-600 rounded-lg text-xs font-medium flex items-center gap-1">
+            <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+            在线
+          </span>
         </div>
       </div>
-    </div>
 
-    <!-- 对话区域 -->
-    <div class="bg-white rounded-xl shadow-md p-6">
-      <!-- 消息列表 -->
-      <div class="space-y-4 mb-6 max-h-96 overflow-y-auto">
-        <div 
-          v-for="(msg, idx) in messages" 
-          :key="idx"
-          :class="[
-            'p-3 rounded-lg max-w-[80%]',
-            msg.role === 'user' 
-              ? 'bg-blue-600 text-white ml-auto' 
-              : 'bg-gray-100 text-gray-800'
-          ]"
-        >
-          {{ msg.content }}
+      <!-- 对话区域 -->
+      <div class="bg-white rounded-2xl shadow-card overflow-hidden">
+        <!-- 顶部装饰 -->
+        <div class="h-1 bg-gradient-to-r from-zhishu-600 via-amber-400 to-zhishu-600 opacity-50"></div>
+        
+        <!-- 消息列表 -->
+        <div class="p-6 space-y-4 min-h-[400px] max-h-[500px] overflow-y-auto">
+          <!-- 欢迎消息 -->
+          <div v-if="messages.length === 0" class="text-center py-8 animate-fade-in">
+            <div class="w-16 h-16 rounded-xl bg-gradient-to-br from-zhishu-100 to-zhishu-50 flex items-center justify-center text-3xl mx-auto mb-4 shadow-lg">
+              {{ agent.icon }}
+            </div>
+            <p class="text-slate-600 font-medium">你好！我是 {{ agent.name }}</p>
+            <p class="text-slate-400 text-sm mt-2">有什么可以帮助你的吗？</p>
+          </div>
+          
+          <!-- 消息气泡 -->
+          <div 
+            v-for="(msg, idx) in messages" 
+            :key="idx"
+            :class="[
+              'message-bubble animate-slide-up',
+              msg.role === 'user' ? 'user' : 'agent'
+            ]"
+          >
+            {{ msg.content }}
+          </div>
+          
+          <!-- 加载中 -->
+          <div v-if="isLoading" class="message-bubble agent flex items-center gap-2">
+            <div class="flex gap-1">
+              <div class="w-2 h-2 rounded-full bg-zhishu-300 animate-bounce" style="animation-delay: 0ms"></div>
+              <div class="w-2 h-2 rounded-full bg-zhishu-300 animate-bounce" style="animation-delay: 150ms"></div>
+              <div class="w-2 h-2 rounded-full bg-zhishu-300 animate-bounce" style="animation-delay: 300ms"></div>
+            </div>
+            <span class="text-slate-400 text-sm">正在思考...</span>
+          </div>
         </div>
         
-        <div v-if="isLoading" class="p-3 rounded-lg bg-gray-100 text-gray-500 max-w-[80%]">
-          正在思考...
+        <!-- 输入区域 -->
+        <div class="p-4 bg-slate-50 border-t border-slate-200/50">
+          <div class="flex gap-3">
+            <textarea 
+              v-model="inputText"
+              placeholder="输入消息，Ctrl+Enter 发送..."
+              class="flex-1 p-4 bg-white border border-slate-200 rounded-xl outline-none focus:border-zhishu-300 focus:ring-2 focus:ring-zhishu-100 resize-none text-slate-700 placeholder:text-slate-400"
+              rows="2"
+              @keyup.ctrl.enter="sendMessage"
+            />
+            <button 
+              @click="sendMessage"
+              :disabled="isLoading || !inputText.trim()"
+              class="px-6 py-4 btn-primary disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+            >
+              <span>发送</span>
+              <span class="text-sm opacity-70">↵</span>
+            </button>
+          </div>
+          <p class="text-xs text-slate-400 mt-2 text-center">
+            ⚡ 模拟对话 · 真实 AI 接口即将上线
+          </p>
         </div>
       </div>
       
-      <!-- 输入区域 -->
-      <div class="flex gap-2">
-        <textarea 
-          v-model="inputText"
-          placeholder="输入消息..."
-          class="flex-1 p-3 border border-gray-200 rounded-lg outline-none focus:border-blue-400 resize-none"
-          rows="2"
-          @keyup.ctrl.enter="sendMessage"
-        />
+      <!-- 快捷操作 -->
+      <div class="mt-6 flex flex-wrap gap-2">
         <button 
-          @click="sendMessage"
-          :disabled="isLoading || !inputText.trim()"
-          class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:opacity-50"
+          v-for="prompt in quickPrompts" 
+          :key="prompt"
+          @click="inputText = prompt"
+          class="px-4 py-2 bg-white text-slate-600 rounded-lg border border-slate-200 hover:border-zhishu-300 hover:bg-zhishu-50 transition text-sm"
         >
-          发送
+          {{ prompt }}
         </button>
       </div>
+    </div>
+    
+    <!-- 加载状态 -->
+    <div v-else class="text-center py-16">
+      <div class="w-20 h-20 rounded-2xl bg-slate-100 flex items-center justify-center text-4xl mx-auto mb-4 animate-pulse-slow">
+        🧠
+      </div>
+      <p class="text-slate-400">加载中...</p>
     </div>
   </div>
 </template>
@@ -78,18 +136,26 @@ const inputText = ref('')
 const isLoading = ref(false)
 const route = useRoute()
 
+// 快捷提示词
+const quickPrompts = [
+  '你好！',
+  '介绍一下你自己',
+  '你能帮我做什么？',
+  '给我一个建议',
+]
+
 // 模拟回复库
 const mockResponses = [
-  '你好！有什么我可以帮助你的吗？',
-  '这是一个很有趣的问题，让我想想...',
-  '根据我的理解，这个问题可以这样解决。',
-  '我很乐意帮助你！请告诉我更多细节。',
-  '好的，我来帮你分析一下。',
-  '这个话题很有意思，我们可以深入讨论。',
+  '你好！很高兴见到你。有什么我可以帮助你的吗？',
+  '这是一个很有趣的问题，让我仔细想想...',
+  '根据我的经验，这个问题可以这样解决：首先明确目标，然后逐步分解任务。',
+  '我很乐意帮助你！请告诉我更多具体的细节。',
+  '好的，我来帮你分析一下。这个问题的核心在于...',
+  '这个话题很有深度，我们可以从多个角度来讨论。',
 ]
 
 const sendMessage = async () => {
-  if (!inputText.trim() || isLoading.value) return
+  if (!inputText.value.trim() || isLoading.value) return
   
   const userMsg = inputText.value.trim()
   messages.value.push({ role: 'user', content: userMsg })
