@@ -34,6 +34,27 @@ class Category(Base):
     icon = Column(String(10))
     sort = Column(Integer, default=0)
 
+class Platform(Base):
+    __tablename__ = "platforms"
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String(50))
+    icon = Column(String(20))
+    url = Column(String(200))
+    sort = Column(Integer, default=0)
+
+class HotTopic(Base):
+    __tablename__ = "hot_topics"
+    id = Column(Integer, primary_key=True, index=True)
+    title = Column(String(200))
+    platform_id = Column(Integer)
+    category_id = Column(Integer)
+    hot_value = Column(Integer, default=0)
+    rank = Column(Integer, default=0)
+    url = Column(String(500))
+    summary = Column(Text)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow)
+
 class Agent(Base):
     __tablename__ = "agents"
     id = Column(Integer, primary_key=True, index=True)
@@ -73,52 +94,70 @@ DEEPSEEK_API_URL = "https://api.deepseek.com/v1/chat/completions"
 def init_data():
     db = SessionLocal()
     
+    # 初始化平台
+    if db.query(Platform).count() == 0:
+        platforms = [
+            Platform(id=1, name="微博", icon="📱", url="https://s.weibo.com/top/summary", sort=1),
+            Platform(id=2, name="知乎", icon="🔵", url="https://www.zhihu.com/hot", sort=2),
+            Platform(id=3, name="抖音", icon="🎬", url="https://www.douyin.com/hot", sort=3),
+            Platform(id=4, name="百度", icon="🔍", url="https://top.baidu.com", sort=4),
+            Platform(id=5, name="今日头条", icon="📰", url="https://www.toutiao.com", sort=5),
+            Platform(id=6, name="虎扑", icon="🏀", url="https://www.hupu.com", sort=6),
+            Platform(id=7, name="豆瓣", icon="🎬", url="https://www.douban.com", sort=7),
+            Platform(id=8, name="B站", icon="📺", url="https://www.bilibili.com/v/popular/rank/all", sort=8),
+        ]
+        db.add_all(platforms)
+    
+    # 初始化热点分类
     if db.query(Category).count() == 0:
         categories = [
-            Category(id=1, name="陪伴", icon="❤️", sort=1),
-            Category(id=2, name="写作", icon="✏️", sort=2),
-            Category(id=3, name="翻译", icon="🌐", sort=3),
-            Category(id=4, name="绘画", icon="🎨", sort=4),
-            Category(id=5, name="编程", icon="💻", sort=5),
-            Category(id=6, name="产品", icon="📊", sort=6),
-            Category(id=7, name="其他", icon="🔧", sort=7),
+            Category(id=1, name="科技", icon="💻", sort=1),
+            Category(id=2, name="财经", icon="💰", sort=2),
+            Category(id=3, name="娱乐", icon="🎭", sort=3),
+            Category(id=4, name="游戏", icon="🎮", sort=4),
+            Category(id=5, name="社会", icon="🌍", sort=5),
+            Category(id=6, name="体育", icon="⚽", sort=6),
+            Category(id=7, name="其他", icon="📋", sort=7),
         ]
         db.add_all(categories)
-        
+    
+    # 初始化热点数据
+    if db.query(HotTopic).count() == 0:
+        topics = [
+            HotTopic(id=1, title="OpenAI发布GPT-5", platform_id=1, category_id=1, hot_value=1000000, rank=1, url="https://weibo.com/example1", summary="OpenAI发布了最新的GPT-5模型，性能大幅提升"),
+            HotTopic(id=2, title="苹果股价创新高", platform_id=2, category_id=2, hot_value=850000, rank=1, url="https://zhihu.com/example2", summary="苹果公司股价突破历史新高"),
+            HotTopic(id=3, title="某明星官宣结婚", platform_id=3, category_id=3, hot_value=720000, rank=1, url="https://douyin.com/example3", summary="知名演员官宣结婚消息"),
+            HotTopic(id=4, title="《黑神话》销量破千万", platform_id=4, category_id=4, hot_value=680000, rank=2, url="https://baidu.com/example4", summary="国产游戏《黑神话：悟空》销量突破千万"),
+            HotTopic(id=5, title="新能源补贴政策", platform_id=5, category_id=5, hot_value=560000, rank=3, url="https://toutiao.com/example5", summary="国家发布新能源汽车补贴新政策"),
+            HotTopic(id=6, title="CBA季后赛直播", platform_id=6, category_id=6, hot_value=450000, rank=2, url="https://hupu.com/example6", summary="CBA季后赛精彩对决"),
+            HotTopic(id=7, title="豆瓣年度榜单发布", platform_id=7, category_id=3, hot_value=380000, rank=4, url="https://douban.com/example7", summary="豆瓣发布年度电影榜单"),
+            HotTopic(id=8, title="B站UP主百万粉丝", platform_id=8, category_id=4, hot_value=320000, rank=5, url="https://bilibili.com/example8", summary="多位UP主粉丝突破百万"),
+            HotTopic(id=9, title="小米新品发布会", platform_id=1, category_id=1, hot_value=950000, rank=2, url="https://weibo.com/example9", summary="小米发布新款手机和智能家居产品"),
+            HotTopic(id=10, title="特斯拉降价风波", platform_id=2, category_id=2, hot_value=780000, rank=2, url="https://zhihu.com/example10", summary="特斯拉再次降价引发热议"),
+            HotTopic(id=11, title="综艺节目热播", platform_id=3, category_id=3, hot_value=620000, rank=2, url="https://douyin.com/example11", summary="热门综艺节目收视率创新高"),
+            HotTopic(id=12, title="Steam新品发售", platform_id=4, category_id=4, hot_value=520000, rank=4, url="https://baidu.com/example12", summary="Steam平台多款新游戏发售"),
+        ]
+        db.add_all(topics)
+    
+    # 智能体相关数据（保留原有）
+    if db.query(Agent).count() == 0:
         agents = [
-            Agent(id=1, name="情感陪伴助手", icon="❤️", description="温暖陪伴，倾听你的心事", category_id=1, sort=1, rating=4.8, rating_count=128, view_count=1520, chat_count=356),
-            Agent(id=2, name="心理咨询助手", icon="🧠", description="专业心理支持，帮你排解困扰", category_id=1, sort=2, rating=4.6, rating_count=89, view_count=980, chat_count=245),
-            Agent(id=3, name="文案写作助手", icon="✏️", description="写出打动人心的文案", category_id=2, sort=1, rating=4.9, rating_count=256, view_count=3200, chat_count=890),
-            Agent(id=4, name="小说创作助手", icon="📖", description="激发灵感，创作精彩故事", category_id=2, sort=2, rating=4.7, rating_count=167, view_count=2100, chat_count=567),
-            Agent(id=5, name="多语言翻译助手", icon="🌐", description="精准翻译，跨越语言障碍", category_id=3, sort=1, rating=4.5, rating_count=78, view_count=890, chat_count=123),
-            Agent(id=6, name="AI绘画助手", icon="🎨", description="创意无限，描绘你的想象", category_id=4, sort=1, rating=4.8, rating_count=198, view_count=2800, chat_count=678),
-            Agent(id=7, name="代码助手", icon="💻", description="高效编程，解决技术难题", category_id=5, sort=1, rating=4.9, rating_count=312, view_count=4500, chat_count=1200),
-            Agent(id=8, name="Debug助手", icon="🔍", description="快速定位问题，优化代码", category_id=5, sort=2, rating=4.7, rating_count=145, view_count=1900, chat_count=456),
-            Agent(id=9, name="产品经理助手", icon="📊", description="产品规划，需求分析专家", category_id=6, sort=1, rating=4.6, rating_count=89, view_count=1200, chat_count=234),
-            Agent(id=10, name="通用助手", icon="🔧", description="全能帮手，解答各类问题", category_id=7, sort=1, rating=4.4, rating_count=56, view_count=670, chat_count=89),
-            Agent(id=11, name="学习助手", icon="📚", description="知识学习，答疑解惑", category_id=7, sort=2, rating=4.5, rating_count=134, view_count=1560, chat_count=345),
-            Agent(id=12, name="生活助手", icon="🌟", description="日常建议，提升生活质量", category_id=7, sort=3, rating=4.3, rating_count=45, view_count=450, chat_count=67),
+            Agent(id=1, name="热点分析助手", icon="🔥", description="智能分析热点趋势", category_id=1, sort=1, rating=4.8, rating_count=128, view_count=1520, chat_count=356),
+            Agent(id=2, name="财经解读助手", icon="💰", description="解读财经热点新闻", category_id=2, sort=2, rating=4.6, rating_count=89, view_count=980, chat_count=245),
+            Agent(id=3, name="娱乐八卦助手", icon="🎭", description="了解娱乐圈动态", category_id=3, sort=1, rating=4.9, rating_count=256, view_count=3200, chat_count=890),
+            Agent(id=4, name="游戏资讯助手", icon="🎮", description="游戏圈最新消息", category_id=4, sort=2, rating=4.7, rating_count=167, view_count=2100, chat_count=567),
         ]
         db.add_all(agents)
         
-        # 初始化智能体人格
         prompts = [
-            AgentPrompt(agent_id=1, system_prompt="你是温暖、善解人意的情感陪伴助手。你擅长倾听用户的心事，给予安慰和支持。你的回复温暖、真诚，像朋友一样陪伴用户。"),
-            AgentPrompt(agent_id=2, system_prompt="你是专业的心理咨询助手。你提供心理支持和建议，帮助用户排解困扰。你的回复专业但不冷漠，给予用户心理上的支持和理解。"),
-            AgentPrompt(agent_id=3, system_prompt="你是专业的文案写作助手。你擅长撰写营销文案、广告文案、品牌文案等。你的文案打动人心，有感染力，能帮助用户解决文案创作难题。"),
-            AgentPrompt(agent_id=4, system_prompt="你是小说创作助手。你帮助用户激发创作灵感，提供情节建议、人物塑造、场景描写等。你像一位写作导师，帮助用户创作精彩的故事。"),
-            AgentPrompt(agent_id=5, system_prompt="你是多语言翻译助手。你精通多种语言，提供精准、自然的翻译。你不仅翻译文字，还能根据语境调整表达方式。"),
-            AgentPrompt(agent_id=6, system_prompt="你是AI绘画助手。你帮助用户构思画面创意，提供构图建议、色彩搭配、风格指导等。你激发用户的艺术想象力。"),
-            AgentPrompt(agent_id=7, system_prompt="你是代码助手，一位资深程序员。你帮助用户解决编程难题、优化代码、解释技术概念。你的回复简洁清晰，带有代码示例。"),
-            AgentPrompt(agent_id=8, system_prompt="你是Debug助手。你帮助用户快速定位代码问题，分析错误原因，提供解决方案。你擅长调试和性能优化。"),
-            AgentPrompt(agent_id=9, system_prompt="你是产品经理助手。你帮助用户进行产品规划、需求分析、用户研究等。你像一位产品导师，提供专业的产品建议。"),
-            AgentPrompt(agent_id=10, system_prompt="你是通用助手，一位全能帮手。你回答各类问题，提供实用建议。你的回复友好、有帮助，解决用户的日常问题。"),
-            AgentPrompt(agent_id=11, system_prompt="你是学习助手。你帮助用户学习知识、解答疑问、提供学习建议。你像一位耐心的老师，帮助用户更好地学习。"),
-            AgentPrompt(agent_id=12, system_prompt="你是生活助手。你提供日常建议，帮助用户提升生活质量。你的建议实用、贴心，让用户的生活更加便利。"),
+            AgentPrompt(agent_id=1, system_prompt="你是热点分析助手，擅长分析各平台热点话题的趋势和背景。"),
+            AgentPrompt(agent_id=2, system_prompt="你是财经解读助手，擅长解读财经新闻、股市动态。"),
+            AgentPrompt(agent_id=3, system_prompt="你是娱乐八卦助手，了解娱乐圈最新动态，分享有趣八卦。"),
+            AgentPrompt(agent_id=4, system_prompt="你是游戏资讯助手，了解游戏圈最新消息、游戏攻略。"),
         ]
         db.add_all(prompts)
-        db.commit()
     
+    db.commit()
     db.close()
 
 init_data()
@@ -137,6 +176,101 @@ class ChatHistory(BaseModel):
     content: str
 
 # API 接口
+
+# ===== 热点聚合 API =====
+
+@app.get("/api/platforms")
+def get_platforms():
+    db = SessionLocal()
+    platforms = db.query(Platform).order_by(Platform.sort).all()
+    db.close()
+    return [{"id": p.id, "name": p.name, "icon": p.icon, "url": p.url} for p in platforms]
+
+@app.get("/api/topics")
+def get_topics(platform: int = None, category: int = None, sort: str = None):
+    db = SessionLocal()
+    query = db.query(HotTopic)
+    
+    if platform:
+        query = query.filter(HotTopic.platform_id == platform)
+    if category:
+        query = query.filter(HotTopic.category_id == category)
+    
+    # 排序
+    if sort == "hot":
+        query = query.order_by(HotTopic.hot_value.desc())
+    else:
+        query = query.order_by(HotTopic.rank)
+    
+    topics = query.all()
+    
+    # 获取平台和分类名称
+    platforms = {p.id: {"name": p.name, "icon": p.icon} for p in db.query(Platform).all()}
+    categories = {c.id: {"name": c.name, "icon": c.icon} for c in db.query(Category).all()}
+    db.close()
+    
+    return [{
+        "id": t.id,
+        "title": t.title,
+        "platform_id": t.platform_id,
+        "platform_name": platforms.get(t.platform_id, {}).get("name", "未知"),
+        "platform_icon": platforms.get(t.platform_id, {}).get("icon", "📱"),
+        "category_id": t.category_id,
+        "category_name": categories.get(t.category_id, {}).get("name", "其他"),
+        "category_icon": categories.get(t.category_id, {}).get("icon", "📋"),
+        "hot_value": t.hot_value,
+        "rank": t.rank,
+        "url": t.url,
+        "summary": t.summary
+    } for t in topics]
+
+@app.get("/api/topics/hot")
+def get_hot_topics():
+    db = SessionLocal()
+    topics = db.query(HotTopic).order_by(HotTopic.hot_value.desc()).limit(10).all()
+    
+    platforms = {p.id: {"name": p.name, "icon": p.icon} for p in db.query(Platform).all()}
+    db.close()
+    
+    return [{
+        "id": t.id,
+        "title": t.title,
+        "platform_name": platforms.get(t.platform_id, {}).get("name", "未知"),
+        "platform_icon": platforms.get(t.platform_id, {}).get("icon", "📱"),
+        "hot_value": t.hot_value,
+        "rank": t.rank,
+        "url": t.url
+    } for t in topics]
+
+@app.get("/api/topics/{topic_id}")
+def get_topic(topic_id: int):
+    db = SessionLocal()
+    topic = db.query(HotTopic).filter(HotTopic.id == topic_id).first()
+    if not topic:
+        db.close()
+        return {"error": "Topic not found"}
+    
+    platform = db.query(Platform).filter(Platform.id == topic.platform_id).first()
+    category = db.query(Category).filter(Category.id == topic.category_id).first()
+    db.close()
+    
+    return {
+        "id": topic.id,
+        "title": topic.title,
+        "platform_id": topic.platform_id,
+        "platform_name": platform.name if platform else "未知",
+        "platform_icon": platform.icon if platform else "📱",
+        "category_id": topic.category_id,
+        "category_name": category.name if category else "其他",
+        "hot_value": topic.hot_value,
+        "rank": topic.rank,
+        "url": topic.url,
+        "summary": topic.summary,
+        "created_at": topic.created_at.isoformat() if topic.created_at else None
+    }
+
+# ===== 原有智能体 API =====
+
 @app.get("/api/categories")
 def get_categories():
     db = SessionLocal()
