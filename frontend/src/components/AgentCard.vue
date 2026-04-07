@@ -11,6 +11,25 @@
     <!-- 名称 -->
     <h3 class="text-lg font-semibold text-gray-800 truncate">{{ agent.name }}</h3>
     
+    <!-- 评分 -->
+    <div class="flex items-center gap-2 mt-2">
+      <div class="flex items-center">
+        <button 
+          v-for="i in 5" 
+          :key="i"
+          @click.stop="rateAgent(i)"
+          :class="[
+            'text-lg transition',
+            i <= Math.round(agent.rating) ? 'text-yellow-400' : 'text-gray-300',
+            'hover:text-yellow-500'
+          ]"
+        >
+          ⭐
+        </button>
+      </div>
+      <span class="text-sm text-gray-500">{{ agent.rating }} ({{ agent.rating_count }})</span>
+    </div>
+    
     <!-- 简介 -->
     <p class="text-sm text-gray-500 mt-2 line-clamp-2">{{ agent.description }}</p>
     
@@ -38,9 +57,12 @@ interface Agent {
   icon: string
   description: string
   category_name?: string
+  rating: number
+  rating_count: number
 }
 
 const props = defineProps<{ agent: Agent }>()
+const emit = defineEmits(['rated'])
 const router = useRouter()
 
 const goToDetail = () => {
@@ -49,5 +71,18 @@ const goToDetail = () => {
 
 const goToChat = () => {
   router.push(`/chat/${props.agent.id}`)
+}
+
+const rateAgent = async (score: number) => {
+  try {
+    await fetch(`/api/agents/${props.agent.id}/rate`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ score })
+    })
+    emit('rated')
+  } catch (e) {
+    console.error('Failed to rate:', e)
+  }
 }
 </script>
