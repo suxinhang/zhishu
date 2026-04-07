@@ -33,7 +33,7 @@
         <div class="h-1 bg-gradient-to-r from-zhishu-600 via-amber-400 to-zhishu-600 opacity-50"></div>
         
         <!-- 消息列表 -->
-        <div class="p-6 space-y-4 min-h-[400px] max-h-[500px] overflow-y-auto">
+        <div ref="messagesContainer" class="p-6 space-y-4 min-h-[400px] max-h-[500px] overflow-y-auto">
           <!-- 欢迎消息 -->
           <div v-if="messages.length === 0" class="text-center py-8 animate-fade-in">
             <div class="w-16 h-16 rounded-xl bg-gradient-to-br from-zhishu-100 to-zhishu-50 flex items-center justify-center text-3xl mx-auto mb-4 shadow-lg">
@@ -64,6 +64,12 @@
             </div>
             <span class="text-slate-400 text-sm">正在思考...</span>
           </div>
+          
+          <!-- 错误提示 -->
+          <div v-if="error" class="p-4 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm">
+            {{ error }}
+            <button @click="error = ''" class="ml-2 text-red-400 hover:text-red-600">关闭</button>
+          </div>
         </div>
         
         <!-- 输入区域 -->
@@ -75,6 +81,7 @@
               class="flex-1 p-4 bg-white border border-slate-200 rounded-xl outline-none focus:border-zhishu-300 focus:ring-2 focus:ring-zhishu-100 resize-none text-slate-700 placeholder:text-slate-400"
               rows="2"
               @keyup.ctrl.enter="sendMessage"
+              :disabled="isLoading"
             />
             <button 
               @click="sendMessage"
@@ -85,9 +92,18 @@
               <span class="text-sm opacity-70">↵</span>
             </button>
           </div>
-          <p class="text-xs text-slate-400 mt-2 text-center">
-            ⚡ 模拟对话 · 真实 AI 接口即将上线
-          </p>
+          <div class="flex items-center justify-between mt-3">
+            <p class="text-xs text-slate-400">
+              ⚡ AI智能对话 · 支持多轮对话
+            </p>
+            <button 
+              v-if="messages.length > 0"
+              @click="clearChat"
+              class="text-xs text-slate-400 hover:text-red-500 transition"
+            >
+              清空对话
+            </button>
+          </div>
         </div>
       </div>
       
@@ -115,7 +131,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, nextTick } from 'vue'
 import { useRoute } from 'vue-router'
 
 interface Agent {
@@ -126,7 +142,7 @@ interface Agent {
 }
 
 interface Message {
-  role: 'user' | 'agent'
+  role: 'user' | 'assistant'
   content: string
 }
 
@@ -134,7 +150,9 @@ const agent = ref<Agent | null>(null)
 const messages = ref<Message[]>([])
 const inputText = ref('')
 const isLoading = ref(false)
+const error = ref('')
 const route = useRoute()
+const messagesContainer = ref<HTMLElement | null>(null)
 
 // 快捷提示词
 const quickPrompts = [
@@ -144,16 +162,7 @@ const quickPrompts = [
   '给我一个建议',
 ]
 
-// 模拟回复库
-const mockResponses = [
-  '你好！很高兴见到你。有什么我可以帮助你的吗？',
-  '这是一个很有趣的问题，让我仔细想想...',
-  '根据我的经验，这个问题可以这样解决：首先明确目标，然后逐步分解任务。',
-  '我很乐意帮助你！请告诉我更多具体的细节。',
-  '好的，我来帮你分析一下。这个问题的核心在于...',
-  '这个话题很有深度，我们可以从多个角度来讨论。',
-]
-
+// 发送消息
 const sendMessage = async () => {
   if (!inputText.value.trim() || isLoading.value) return
   
@@ -161,14 +170,50 @@ const sendMessage = async () => {
   messages.value.push({ role: 'user', content: userMsg })
   inputText.value = ''
   isLoading.value = true
+  error.value = ''
   
-  // 模拟延迟响应
-  await new Promise(r => setTimeout(r, 1000 + Math.random() * 1000))
+  // 构建对话历史
+  const history = messages.value.slice(0, -1).map(m => ({
+    role: m.role,
+    content: m.content
+  }))
   
-  // 随机选择回复
-  const response = mockResponses[Math.floor(Math.random() * mockResponses.length)]
-  messages.value.push({ role: 'agent', content: response })
+  try {
+    const res = await fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        agent_id: agent.value?.id,
+        message: userMsg,
+        history: history
+      })
+    })
+    
+    const data = await res.json()
+    
+    if (data.success) {
+      messages.value.push({ role: 'assistant', content: data.reply })
+    } else {
+      error.value = data.error || '发送失败，请重试'
+    }
+  } catch (e) {
+    error.value = '网络错误，请检查连接'
+  }
+  
   isLoading.value = false
+  
+  // 滚动到底部
+  nextTick(() => {
+    if (messagesContainer.value) {
+      messagesContainer.value.scrollTop = messagesContainer.value.scrollHeight
+    }
+  })
+}
+
+// 清空对话
+const clearChat = () => {
+  messages.value = []
+  error.value = ''
 }
 
 onMounted(async () => {

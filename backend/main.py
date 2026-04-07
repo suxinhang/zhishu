@@ -1,11 +1,13 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from sqlalchemy import create_engine, Column, Integer, String, DateTime, Float, text
+from sqlalchemy import create_engine, Column, Integer, String, DateTime, Float, Text
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from datetime import datetime
 from pydantic import BaseModel
 import json
+import httpx
+import os
 
 app = FastAPI(title="知枢 API", docs_url="/docs", redoc_url="/redoc")
 
@@ -53,8 +55,19 @@ class Rating(Base):
     score = Column(Integer)
     created_at = Column(DateTime, default=datetime.utcnow)
 
+class AgentPrompt(Base):
+    __tablename__ = "agent_prompts"
+    id = Column(Integer, primary_key=True, index=True)
+    agent_id = Column(Integer)
+    system_prompt = Column(Text)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
 # 创建表
 Base.metadata.create_all(bind=engine)
+
+# DeepSeek API 配置
+DEEPSEEK_API_KEY = os.getenv("DEEPSEEK_API_KEY", "")
+DEEPSEEK_API_URL = "https://api.deepseek.com/v1/chat/completions"
 
 # 初始化数据
 def init_data():
@@ -87,6 +100,23 @@ def init_data():
             Agent(id=12, name="生活助手", icon="🌟", description="日常建议，提升生活质量", category_id=7, sort=3, rating=4.3, rating_count=45, view_count=450, chat_count=67),
         ]
         db.add_all(agents)
+        
+        # 初始化智能体人格
+        prompts = [
+            AgentPrompt(agent_id=1, system_prompt="你是温暖、善解人意的情感陪伴助手。你擅长倾听用户的心事，给予安慰和支持。你的回复温暖、真诚，像朋友一样陪伴用户。"),
+            AgentPrompt(agent_id=2, system_prompt="你是专业的心理咨询助手。你提供心理支持和建议，帮助用户排解困扰。你的回复专业但不冷漠，给予用户心理上的支持和理解。"),
+            AgentPrompt(agent_id=3, system_prompt="你是专业的文案写作助手。你擅长撰写营销文案、广告文案、品牌文案等。你的文案打动人心，有感染力，能帮助用户解决文案创作难题。"),
+            AgentPrompt(agent_id=4, system_prompt="你是小说创作助手。你帮助用户激发创作灵感，提供情节建议、人物塑造、场景描写等。你像一位写作导师，帮助用户创作精彩的故事。"),
+            AgentPrompt(agent_id=5, system_prompt="你是多语言翻译助手。你精通多种语言，提供精准、自然的翻译。你不仅翻译文字，还能根据语境调整表达方式。"),
+            AgentPrompt(agent_id=6, system_prompt="你是AI绘画助手。你帮助用户构思画面创意，提供构图建议、色彩搭配、风格指导等。你激发用户的艺术想象力。"),
+            AgentPrompt(agent_id=7, system_prompt="你是代码助手，一位资深程序员。你帮助用户解决编程难题、优化代码、解释技术概念。你的回复简洁清晰，带有代码示例。"),
+            AgentPrompt(agent_id=8, system_prompt="你是Debug助手。你帮助用户快速定位代码问题，分析错误原因，提供解决方案。你擅长调试和性能优化。"),
+            AgentPrompt(agent_id=9, system_prompt="你是产品经理助手。你帮助用户进行产品规划、需求分析、用户研究等。你像一位产品导师，提供专业的产品建议。"),
+            AgentPrompt(agent_id=10, system_prompt="你是通用助手，一位全能帮手。你回答各类问题，提供实用建议。你的回复友好、有帮助，解决用户的日常问题。"),
+            AgentPrompt(agent_id=11, system_prompt="你是学习助手。你帮助用户学习知识、解答疑问、提供学习建议。你像一位耐心的老师，帮助用户更好地学习。"),
+            AgentPrompt(agent_id=12, system_prompt="你是生活助手。你提供日常建议，帮助用户提升生活质量。你的建议实用、贴心，让用户的生活更加便利。"),
+        ]
+        db.add_all(prompts)
         db.commit()
     
     db.close()
@@ -96,6 +126,15 @@ init_data()
 # Pydantic 模型
 class RatingRequest(BaseModel):
     score: int
+
+class ChatRequest(BaseModel):
+    agent_id: int
+    message: str
+    history: list = []
+
+class ChatHistory(BaseModel):
+    role: str
+    content: str
 
 # API 接口
 @app.get("/api/categories")
@@ -226,6 +265,62 @@ def record_chat(agent_id: int):
         db.commit()
     db.close()
     return {"success": True}
+
+@app.post("/api/chat")
+async def chat(req: ChatRequest):
+    db = SessionLocal()
+    
+    # 获取智能体人格
+    prompt = db.query(AgentPrompt).filter(AgentPrompt.agent_id == req.agent_id).first()
+    agent = db.query(Agent).filter(Agent.id == req.agent_id).first()
+    
+    # 增加对话计数
+    if agent:
+        agent.chat_count += 1
+        db.commit()
+    
+    db.close()
+    
+    system_prompt = prompt.system_prompt if prompt else "你是知枢的智能助手，请友好、有帮助地回答用户问题。"
+    
+    # 构建消息
+    messages = [{"role": "system", "content": system_prompt}]
+    for h in req.history:
+        messages.append({"role": h["role"], "content": h["content"]})
+    messages.append({"role": "user", "content": req.message})
+    
+    # 调用 DeepSeek API（如果没有 API Key，使用模拟回复）
+    if DEEPSEEK_API_KEY:
+        try:
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                response = await client.post(
+                    DEEPSEEK_API_URL,
+                    headers={"Authorization": f"Bearer {DEEPSEEK_API_KEY}"},
+                    json={
+                        "model": "deepseek-chat",
+                        "messages": messages,
+                        "max_tokens": 500
+                    }
+                )
+                data = response.json()
+                reply = data["choices"][0]["message"]["content"]
+                return {"reply": reply, "success": True}
+        except Exception as e:
+            # API 调用失败，使用备用回复
+            return {"reply": f"抱歉，AI服务暂时不可用。请稍后再试。", "success": False, "error": str(e)}
+    else:
+        # 模拟回复（开发环境）
+        mock_responses = [
+            "这是一个很有趣的问题，让我想想...",
+            "根据我的经验，这个问题可以这样解决。",
+            "我很乐意帮助你！请告诉我更多细节。",
+            "好的，我来帮你分析一下。",
+            "这个话题很有意思，我们可以深入讨论。",
+            "你的想法很有创意！我建议...",
+        ]
+        import random
+        reply = random.choice(mock_responses)
+        return {"reply": reply, "success": True, "mock": True}
 
 @app.get("/")
 def root():
