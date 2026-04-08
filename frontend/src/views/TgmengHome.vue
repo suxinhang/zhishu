@@ -1,17 +1,23 @@
 <template>
   <div class="tgmeng-app">
-    <!-- 顶部导航 -->
+    <!-- 顶部导航 - 响应式 -->
     <header class="tgmeng-header">
       <div class="tgmeng-container">
         <div class="tgmeng-header-inner">
           <!-- Logo -->
-          <div class="tgmeng-logo">
+          <router-link to="/tgmeng" class="tgmeng-logo">
             <span class="tgmeng-logo-icon">🍭</span>
             <span class="tgmeng-logo-text">糖果梦热榜</span>
-          </div>
+          </router-link>
           
-          <!-- 分类导航 -->
-          <nav class="tgmeng-nav">
+          <!-- 移动端菜单按钮 -->
+          <button class="tgmeng-menu-btn" @click="showMenu = !showMenu">
+            <span v-if="!showMenu">☰</span>
+            <span v-else>✕</span>
+          </button>
+          
+          <!-- 分类导航 - PC端 -->
+          <nav class="tgmeng-nav tgmeng-nav-pc">
             <div class="tgmeng-nav-scroll">
               <button 
                 v-for="cat in categories" 
@@ -25,8 +31,8 @@
             </div>
           </nav>
           
-          <!-- 搜索框 -->
-          <div class="tgmeng-search">
+          <!-- 搜索框 - PC端 -->
+          <div class="tgmeng-search tgmeng-search-pc">
             <input 
               v-model="searchQuery"
               type="text"
@@ -36,6 +42,32 @@
             <button @click="search" class="tgmeng-search-btn">🔍</button>
           </div>
         </div>
+        
+        <!-- 移动端导航 - 下拉菜单 -->
+        <transition name="slide">
+          <div v-if="showMenu" class="tgmeng-mobile-nav">
+            <div class="tgmeng-mobile-search">
+              <input 
+                v-model="searchQuery"
+                type="text"
+                placeholder="搜索热点..."
+                @keyup.enter="search"
+              />
+              <button @click="search">🔍</button>
+            </div>
+            <div class="tgmeng-mobile-cats">
+              <button 
+                v-for="cat in categories" 
+                :key="cat.id"
+                @click="selectCategoryMobile(cat.id)"
+                :class="['tgmeng-mobile-cat', { active: selectedCategory === cat.id }]"
+              >
+                <span>{{ cat.icon }}</span>
+                <span>{{ cat.name }}</span>
+              </button>
+            </div>
+          </div>
+        </transition>
       </div>
     </header>
 
@@ -49,13 +81,13 @@
               @click="mode = 'ai'"
               :class="['tgmeng-mode-btn', { active: mode === 'ai' }]"
             >
-              🤖 AI模式
+              🤖 <span class="mode-text">AI模式</span>
             </button>
             <button 
               @click="mode = 'sugar'"
               :class="['tgmeng-mode-btn', { active: mode === 'sugar' }]"
             >
-              🍭 糖果模式
+              🍭 <span class="mode-text">糖果模式</span>
             </button>
           </div>
           
@@ -116,8 +148,8 @@
               </div>
             </div>
             
-            <!-- 数据 -->
-            <div class="tgmeng-stats">
+            <!-- 数据 - PC端 -->
+            <div class="tgmeng-stats tgmeng-stats-pc">
               <span>👁 {{ formatNumber(topic.view_count) }}</span>
               <span>💬 {{ topic.comment_count }}</span>
             </div>
@@ -164,6 +196,7 @@ const currentSort = ref('hot')
 const selectedCategory = ref<number | null>(null)
 const lastUpdate = ref('')
 const aiSummary = ref('')
+const showMenu = ref(false)
 
 const sortOptions = [
   { label: '🔥 热门', value: 'hot' },
@@ -172,26 +205,51 @@ const sortOptions = [
 ]
 
 const formatNumber = (num: number) => num >= 10000 ? (num / 10000).toFixed(1) + 'w' : num >= 1000 ? (num / 1000).toFixed(1) + 'k' : num
-const selectCategory = (catId: number | null) => { selectedCategory.value = selectedCategory.value === catId ? null : catId; loadTopics() }
+
+const selectCategory = (catId: number | null) => {
+  selectedCategory.value = selectedCategory.value === catId ? null : catId
+  loadTopics()
+}
+
+const selectCategoryMobile = (catId: number | null) => {
+  selectCategory(catId)
+  showMenu.value = false
+}
+
 const loadCategories = async () => { categories.value = await (await fetch('/api/categories')).json() }
+
 const loadTopics = async () => {
   const params = new URLSearchParams()
   params.append('sort', currentSort.value)
   if (selectedCategory.value) params.append('category', selectedCategory.value.toString())
   topics.value = await (await fetch(`/api/topics?${params}`)).json()
 }
-const search = async () => { if (searchQuery.value.trim()) topics.value = await (await fetch(`/api/search?q=${encodeURIComponent(searchQuery.value)}`)).json() }
+
+const search = async () => {
+  if (searchQuery.value.trim()) {
+    topics.value = await (await fetch(`/api/search?q=${encodeURIComponent(searchQuery.value)}`)).json()
+    showMenu.value = false
+  }
+}
+
 const sortBy = (sort: string) => { currentSort.value = sort; loadTopics() }
 const loadMore = () => {}
 const openTopic = (topic: Topic) => { window.open(topic.url, '_blank') }
 
-watch(mode, (newMode) => { if (newMode === 'ai' && topics.value.length > 0) aiSummary.value = `当前全网热点主要集中在科技和财经领域。${topics.value[0]?.title}位居榜首，热度持续上升。` })
+watch(mode, (newMode) => {
+  if (newMode === 'ai' && topics.value.length > 0) {
+    aiSummary.value = `当前全网热点主要集中在科技和财经领域。${topics.value[0]?.title}位居榜首，热度持续上升。`
+  }
+})
 
-onMounted(async () => { await Promise.all([loadCategories(), loadTopics()]); lastUpdate.value = new Date().toLocaleTimeString() })
+onMounted(async () => {
+  await Promise.all([loadCategories(), loadTopics()])
+  lastUpdate.value = new Date().toLocaleTimeString()
+})
 </script>
 
 <style scoped>
-/* 全局样式 */
+/* 复用之前的样式，添加响应式 */
 .tgmeng-app {
   min-height: 100vh;
   background: #F5F5F5;
@@ -227,6 +285,8 @@ onMounted(async () => { await Promise.all([loadCategories(), loadTopics()]); las
   align-items: center;
   gap: 8px;
   flex-shrink: 0;
+  text-decoration: none;
+  color: inherit;
 }
 
 .tgmeng-logo-icon {
@@ -237,6 +297,17 @@ onMounted(async () => { await Promise.all([loadCategories(), loadTopics()]); las
   font-size: 18px;
   font-weight: 600;
   color: #1A1A1A;
+}
+
+/* 移动端菜单按钮 */
+.tgmeng-menu-btn {
+  display: none;
+  margin-left: auto;
+  padding: 8px;
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
 }
 
 .tgmeng-nav {
@@ -311,6 +382,60 @@ onMounted(async () => { await Promise.all([loadCategories(), loadTopics()]); las
   border: none;
   cursor: pointer;
   font-size: 14px;
+}
+
+/* 移动端导航 */
+.tgmeng-mobile-nav {
+  padding: 16px 0;
+  border-top: 1px solid #E5E5E5;
+}
+
+.tgmeng-mobile-search {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.tgmeng-mobile-search input {
+  flex: 1;
+  height: 40px;
+  padding: 0 12px;
+  border: 1px solid #E5E5E5;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.tgmeng-mobile-search button {
+  padding: 0 16px;
+  background: #1890FF;
+  color: #FFF;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.tgmeng-mobile-cats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+.tgmeng-mobile-cat {
+  padding: 12px 8px;
+  background: #F5F5F5;
+  border: none;
+  border-radius: 6px;
+  font-size: 12px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.tgmeng-mobile-cat.active {
+  background: #1890FF;
+  color: #FFF;
 }
 
 /* 工具栏 */
@@ -602,22 +727,75 @@ onMounted(async () => { await Promise.all([loadCategories(), loadTopics()]); las
   margin: 0;
 }
 
+/* 动画 */
+.slide-enter-active,
+.slide-leave-active {
+  transition: all 0.3s ease;
+}
+
+.slide-enter-from,
+.slide-leave-to {
+  opacity: 0;
+  transform: translateY(-10px);
+}
+
 /* 响应式 */
 @media (max-width: 768px) {
-  .tgmeng-nav {
-    margin: 0 12px;
+  .tgmeng-nav-pc,
+  .tgmeng-search-pc {
+    display: none;
   }
   
-  .tgmeng-search input {
-    width: 120px;
+  .tgmeng-menu-btn {
+    display: block;
+    margin-left: 16px;
   }
   
-  .tgmeng-stats {
+  .tgmeng-stats-pc {
     display: none;
   }
   
   .tgmeng-sugar {
     margin-left: 12px;
+  }
+  
+  .tgmeng-title {
+    font-size: 14px;
+  }
+  
+  .mode-text {
+    display: none;
+  }
+  
+  .tgmeng-mode-btn {
+    padding: 6px 12px;
+    font-size: 16px;
+  }
+  
+  .tgmeng-sort-label {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .tgmeng-container {
+    padding: 0 12px;
+  }
+  
+  .tgmeng-list-item {
+    padding: 12px;
+  }
+  
+  .tgmeng-mobile-cats {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  
+  .tgmeng-sugar-num {
+    font-size: 14px;
+  }
+  
+  .tgmeng-sugar-label {
+    font-size: 9px;
   }
 }
 </style>
