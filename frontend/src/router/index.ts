@@ -3,21 +3,29 @@ import { createRouter, createWebHistory } from 'vue-router'
 const router = createRouter({
   history: createWebHistory(),
   routes: [
-    // 知枢智能体平台
+    // 门户首页
     {
       path: '/',
-      name: 'Home',
-      component: () => import('../views/Home.vue'),
+      name: 'Portal',
+      component: () => import('../views/Portal.vue'),
       meta: { title: '知枢 - 智能体聚合平台' }
     },
+    
+    // 知枢智能体平台
     {
-      path: '/category',
-      name: 'Category',
-      component: () => import('../views/Category.vue'),
+      path: '/agents',
+      name: 'AgentsHome',
+      component: () => import('../views/AgentsHome.vue'),
+      meta: { title: '智能体 - 知枢' }
+    },
+    {
+      path: '/agents/category',
+      name: 'AgentsCategory',
+      component: () => import('../views/AgentsCategory.vue'),
       meta: { title: '分类 - 知枢' }
     },
     {
-      path: '/agent/:id',
+      path: '/agents/:id',
       name: 'AgentDetail',
       component: () => import('../views/AgentDetail.vue'),
       meta: { title: '智能体详情 - 知枢' }
@@ -28,19 +36,13 @@ const router = createRouter({
       component: () => import('../views/Chat.vue'),
       meta: { title: '对话 - 知枢' }
     },
-    {
-      path: '/about',
-      name: 'About',
-      component: () => import('../views/About.vue'),
-      meta: { title: '关于 - 知枢' }
-    },
     
     // 糖果梦热榜
     {
       path: '/tgmeng',
       name: 'TgmengHome',
       component: () => import('../views/TgmengHome.vue'),
-      meta: { title: '糖果梦热榜 - 实时聚合热榜' }
+      meta: { title: '糖果梦热榜' }
     },
     {
       path: '/tgmeng/category/:id',
