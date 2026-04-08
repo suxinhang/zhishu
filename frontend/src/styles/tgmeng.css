@@ -1,0 +1,87 @@
+/* 糖果梦热榜 - 设计规范 */
+
+:root {
+  /* 主题色 */
+  --primary: #FF6B6B;      /* 糖果红 */
+  --secondary: #4ECDC4;    /* 薄荷绿 */
+  --accent: #FFE66D;       /* 柠檬黄 */
+  
+  /* 文字颜色 */
+  --text-primary: #2D3436;
+  --text-secondary: #636E72;
+  --text-muted: #B2BEC3;
+  
+  /* 背景色 */
+  --bg-primary: #FFFFFF;
+  --bg-secondary: #F8F9FA;
+  --bg-card: #FFFFFF;
+  
+  /* 边框 */
+  --border-color: #E0E0E0;
+  --border-radius: 12px;
+  
+  /* 阴影 */
+  --shadow-sm: 0 2px 8px rgba(0,0,0,0.08);
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.12);
+  --shadow-lg: 0 8px 32px rgba(0,0,0,0.16);
+}
+
+/* 卡片样式 */
+.hot-card {
+  background: var(--bg-card);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-sm);
+  padding: 16px;
+  transition: all 0.3s ease;
+}
+
+.hot-card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+/* 热度标签 */
+.hot-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.hot-tag.fire {
+  background: linear-gradient(135deg, #FF6B6B, #FF8E53);
+  color: white;
+}
+
+.hot-tag.new {
+  background: linear-gradient(135deg, #4ECDC4, #44A08D);
+  color: white;
+}
+
+/* 排名样式 */
+.rank-badge {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  font-weight: bold;
+  font-size: 12px;
+}
+
+.rank-badge.top1 { background: #FFD700; color: #333; }
+.rank-badge.top2 { background: #C0C0C0; color: #333; }
+.rank-badge.top3 { background: #CD7F32; color: white; }
+
+/* 来源标签 */
+.source-tag {
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+}
