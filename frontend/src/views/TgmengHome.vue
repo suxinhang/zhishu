@@ -13,22 +13,13 @@
           <a 
             v-for="cat in categories" 
             :key="cat.id"
-            :href="`/tgmeng/category/${cat.id}`"
+            href="#"
+            @click.prevent="selectSource(cat.id)"
             class="nav-cat"
-            :class="{ active: selectedCategory === cat.id }"
+            :class="{ active: currentSource === cat.id }"
           >
             {{ cat.name }}
           </a>
-        </div>
-        
-        <!-- 搜索 -->
-        <div class="search-box">
-          <input 
-            v-model="searchQuery"
-            type="text"
-            placeholder="搜索"
-            @keyup.enter="doSearch"
-          />
         </div>
       </div>
     </header>
@@ -36,9 +27,15 @@
     <!-- 热榜 -->
     <div class="main">
       <div class="list-wrap">
+        <div class="source-info" v-if="currentData">
+          <h2>{{ currentData.title }}</h2>
+          <p>{{ currentData.description }}</p>
+          <span class="update-time">更新时间: {{ formatTime(currentData.updateTime) }}</span>
+        </div>
+        
         <div class="list">
           <a 
-            v-for="(item, idx) in topics" 
+            v-for="(item, idx) in hotList" 
             :key="item.id"
             :href="item.url"
             target="_blank"
@@ -46,8 +43,7 @@
           >
             <span class="num" :class="'top' + (idx + 1)">{{ idx + 1 }}</span>
             <span class="title">{{ item.title }}</span>
-            <span class="from">{{ item.source }}</span>
-            <span class="heat">{{ item.sugar_index }}</span>
+            <span class="desc" v-if="item.desc && item.desc !== item.title">{{ item.desc.slice(0, 30) }}</span>
           </a>
         </div>
       </div>
@@ -56,7 +52,7 @@
     <!-- 底部 -->
     <div class="footer">
       <p>🍭 糖果梦热榜 · 科技不该冰冷，人性不该傲慢</p>
-      <p class="footer-small">微博 · 知乎 · 抖音 · V2EX 等 200+ 平台实时聚合</p>
+      <p class="footer-small">数据来源: 微博 · 知乎 · 抖音 · B站 等 45+ 平台实时聚合</p>
     </div>
   </div>
 </template>
@@ -64,32 +60,52 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 
-const categories = ref([])
-const topics = ref([])
-const searchQuery = ref('')
-const selectedCategory = ref(null)
+// API 基础地址 - 使用公开 API
+const API_BASE = 'https://api-hot.imsyy.top'
 
-const formatNum = n => n > 9999 ? (n/10000).toFixed(1) + '万' : n
+// 数据源列表
+const categories = ref([
+  { id: 'weibo', name: '微博' },
+  { id: 'zhihu', name: '知乎' },
+  { id: 'bilibili', name: 'B站' },
+  { id: 'douyin', name: '抖音' },
+  { id: 'baidu', name: '百度' },
+  { id: 'toutiao', name: '头条' },
+  { id: '36kr', name: '36氪' },
+  { id: 'juejin', name: '掘金' },
+  { id: 'v2ex', name: 'V2EX' },
+  { id: 'hupu', name: '虎扑' },
+])
 
-const loadCats = async () => {
-  const res = await fetch('/api/categories')
-  categories.value = await res.json()
+const currentSource = ref('weibo')
+const currentData = ref(null)
+const hotList = ref([])
+
+const formatTime = (t) => {
+  if (!t) return ''
+  return new Date(t).toLocaleString('zh-CN')
 }
 
-const loadTopics = async () => {
-  const res = await fetch('/api/topics?limit=30')
-  topics.value = await res.json()
+const loadData = async (source) => {
+  try {
+    const res = await fetch(`${API_BASE}/${source}`)
+    const json = await res.json()
+    if (json.code === 200) {
+      currentData.value = json
+      hotList.value = json.data || []
+    }
+  } catch (e) {
+    console.error('加载失败:', e)
+  }
 }
 
-const doSearch = async () => {
-  if (!searchQuery.value.trim()) return
-  const res = await fetch(`/api/search?q=${encodeURIComponent(searchQuery.value)}`)
-  topics.value = await res.json()
+const selectSource = (source) => {
+  currentSource.value = source
+  loadData(source)
 }
 
 onMounted(() => {
-  loadCats()
-  loadTopics()
+  loadData('weibo')
 })
 </script>
 
@@ -147,17 +163,6 @@ body {
 .nav-cat:hover { background: #f5f5f5; }
 .nav-cat.active { background: #ff6b6b; color: #fff; }
 
-/* 搜索 */
-.search-box input {
-  width: 140px;
-  padding: 6px 12px;
-  border: 1px solid #ddd;
-  border-radius: 16px;
-  font-size: 13px;
-  outline: none;
-}
-.search-box input:focus { border-color: #aaa; }
-
 /* 主体 */
 .main {
   max-width: 1000px;
@@ -167,6 +172,25 @@ body {
 .list-wrap {
   background: #fff;
   border-radius: 8px;
+}
+
+/* 数据源信息 */
+.source-info {
+  padding: 16px;
+  border-bottom: 1px solid #f5f5f5;
+}
+.source-info h2 {
+  font-size: 18px;
+  margin-bottom: 4px;
+}
+.source-info p {
+  font-size: 12px;
+  color: #999;
+  margin-bottom: 4px;
+}
+.update-time {
+  font-size: 11px;
+  color: #bbb;
 }
 
 /* 列表 */
@@ -184,14 +208,15 @@ body {
 .item:hover .title { color: #ff6b6b; }
 
 .num {
-  width: 20px;
+  width: 24px;
   font-size: 12px;
   color: #999;
   font-weight: 500;
+  flex-shrink: 0;
 }
-.num.top1 { color: #ff6b6b; font-weight: 600; }
-.num.top2 { color: #ff8c42; font-weight: 600; }
-.num.top3 { color: #ffb347; font-weight: 600; }
+.num.top1 { color: #ff6b6b; font-weight: 600; font-size: 14px; }
+.num.top2 { color: #ff8c42; font-weight: 600; font-size: 14px; }
+.num.top3 { color: #ffb347; font-weight: 600; font-size: 14px; }
 
 .title {
   flex: 1;
@@ -201,15 +226,13 @@ body {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.from {
+.desc {
   font-size: 12px;
   color: #999;
-  margin-right: 12px;
-}
-.heat {
-  font-size: 12px;
-  color: #ff6b6b;
-  font-weight: 500;
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /* 底部 */
@@ -229,7 +252,6 @@ body {
 @media (max-width: 640px) {
   .nav-cats { gap: 2px; }
   .nav-cat { padding: 4px 8px; font-size: 12px; }
-  .search-box input { width: 80px; }
-  .from { display: none; }
+  .desc { display: none; }
 }
 </style>
