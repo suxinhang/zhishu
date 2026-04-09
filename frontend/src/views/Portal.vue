@@ -4,121 +4,188 @@
     <header class="header">
       <div class="container">
         <div class="nav">
-          <div class="logo">
-            <img src="/logo.svg" alt="知枢" height="32" />
-          </div>
+          <a href="/" class="logo">
+            <svg class="logo-mark" viewBox="0 0 32 32" width="28" height="28">
+              <circle cx="16" cy="16" r="14" fill="none" stroke="currentColor" stroke-width="2"/>
+              <circle cx="16" cy="12" r="3" fill="currentColor"/>
+              <circle cx="10" cy="20" r="2" fill="currentColor"/>
+              <circle cx="22" cy="20" r="2" fill="currentColor"/>
+              <path d="M12 15 Q16 17 20 15" fill="none" stroke="currentColor" stroke-width="1.5"/>
+            </svg>
+            <span class="logo-text">知枢</span>
+          </a>
           <div class="nav-links">
             <a href="#products">产品</a>
             <a href="#features">特性</a>
-            <a href="#about">关于</a>
           </div>
           <div class="nav-actions">
-            <a href="/agents" class="btn-outline">智能体</a>
+            <a href="/agents" class="btn-text">智能体</a>
             <a href="/tgmeng" class="btn-primary">热榜</a>
           </div>
         </div>
       </div>
     </header>
 
-    <!-- Hero 区域 -->
+    <!-- Hero -->
     <section class="hero">
       <div class="container">
         <div class="hero-content">
-          <div class="hero-badge">让智能触手可及</div>
           <h1 class="hero-title">
-            知枢
-            <span class="gradient-text">智能体聚合平台</span>
+            发现智能
+            <span class="highlight">新可能</span>
           </h1>
           <p class="hero-desc">
-            发现、体验各类 AI 智能助手，实时追踪全网热点
+            知枢是一个智能体聚合平台，让你轻松发现和使用各类 AI 助手，同时实时追踪全网热点。
           </p>
           <div class="hero-actions">
             <a href="/agents" class="btn-large btn-primary">
-              <span>🤖</span> 探索智能体
+              开始探索
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <path d="M6 3L11 8L6 13" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              </svg>
             </a>
-            <a href="/tgmeng" class="btn-large btn-outline">
-              <span>🔥</span> 查看热榜
-            </a>
-          </div>
-          <div class="hero-stats">
-            <div class="stat">
-              <div class="stat-num">45+</div>
-              <div class="stat-label">数据源</div>
-            </div>
-            <div class="stat">
-              <div class="stat-num">实时</div>
-              <div class="stat-label">热榜更新</div>
-            </div>
-            <div class="stat">
-              <div class="stat-num">AI</div>
-              <div class="stat-label">智能对话</div>
-            </div>
+            <a href="/tgmeng" class="btn-large btn-outline">浏览热榜</a>
           </div>
         </div>
+        
         <div class="hero-visual">
           <div class="visual-card">
             <div class="visual-header">
-              <span class="dot red"></span>
-              <span class="dot yellow"></span>
-              <span class="dot green"></span>
+              <div class="card-title">热门智能体</div>
+              <a href="/agents" class="view-all">查看全部 →</a>
             </div>
-            <div class="visual-content">
-              <div class="code-line"><span class="keyword">const</span> 知枢 = {</div>
-              <div class="code-line indent"><span class="string">智能体</span>: <span class="number">∞</span>,</div>
-              <div class="code-line indent"><span class="string">热榜</span>: <span class="string">'实时'</span>,</div>
-              <div class="code-line indent"><span class="string">AI</span>: <span class="keyword">true</span></div>
-              <div class="code-line">}</div>
+            <div class="visual-list">
+              <div class="visual-item">
+                <div class="item-icon">
+                  <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#4F46E5" stroke-width="2">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/>
+                    <path d="M8 14s1.5 2 4 2 4-2 4-2"/>
+                    <circle cx="9" cy="9" r="1" fill="#4F46E5"/>
+                    <circle cx="15" cy="9" r="1" fill="#4F46E5"/>
+                  </svg>
+                </div>
+                <div class="item-info">
+                  <div class="item-name">写作助手</div>
+                  <div class="item-desc">智能创作，文案生成</div>
+                </div>
+              </div>
+              <div class="visual-item">
+                <div class="item-icon">
+                  <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#059669" stroke-width="2">
+                    <polyline points="16 18 22 12 16 6"/>
+                    <polyline points="8 6 2 12 8 18"/>
+                  </svg>
+                </div>
+                <div class="item-info">
+                  <div class="item-name">编程助手</div>
+                  <div class="item-desc">代码生成与优化</div>
+                </div>
+              </div>
+              <div class="visual-item">
+                <div class="item-icon">
+                  <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#DC2626" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="2" y1="12" x2="22" y2="12"/>
+                    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+                  </svg>
+                </div>
+                <div class="item-info">
+                  <div class="item-name">翻译助手</div>
+                  <div class="item-desc">多语言精准翻译</div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- 产品区域 -->
+    <!-- 产品 -->
     <section id="products" class="products">
       <div class="container">
         <h2 class="section-title">我们的产品</h2>
         <div class="products-grid">
           <a href="/agents" class="product-card">
-            <div class="product-icon">🤖</div>
+            <div class="product-icon">
+              <svg viewBox="0 0 48 48" width="48" height="48" fill="none">
+                <rect x="6" y="6" width="36" height="36" rx="8" fill="#EEF2FF"/>
+                <circle cx="24" cy="20" r="6" stroke="#4F46E5" stroke-width="2"/>
+                <path d="M14 34c0-4 4-7 10-7s10 3 10 7" stroke="#4F46E5" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+            </div>
             <h3>智能体平台</h3>
-            <p>发现、体验各类 AI 智能助手，覆盖陪伴、写作、编程、翻译等场景</p>
-            <span class="product-arrow">→</span>
+            <p>发现、体验各类 AI 智能助手</p>
+            <div class="card-arrow">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                <path d="M7 5L12 10L7 15" stroke="currentColor" stroke-width="1.5"/>
+              </svg>
+            </div>
           </a>
           <a href="/tgmeng" class="product-card">
-            <div class="product-icon">🔥</div>
-            <h3>全网热榜</h3>
-            <p>实时聚合微博、知乎、抖音等 45+ 平台热点，AI 深度洞察</p>
-            <span class="product-arrow">→</span>
+            <div class="product-icon">
+              <svg viewBox="0 0 48 48" width="48" height="48" fill="none">
+                <rect x="6" y="6" width="36" height="36" rx="8" fill="#FEF3C7"/>
+                <path d="M24 14v10l6 4" stroke="#D97706" stroke-width="2" stroke-linecap="round"/>
+                <circle cx="24" cy="24" r="14" stroke="#D97706" stroke-width="2"/>
+              </svg>
+            </div>
+            <h3>知枢热榜</h3>
+            <p>实时聚合全网热点资讯</p>
+            <div class="card-arrow">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                <path d="M7 5L12 10L7 15" stroke="currentColor" stroke-width="1.5"/>
+              </svg>
+            </div>
           </a>
         </div>
       </div>
     </section>
 
-    <!-- 特性区域 -->
+    <!-- 特性 -->
     <section id="features" class="features">
       <div class="container">
         <h2 class="section-title">为什么选择知枢</h2>
         <div class="features-grid">
           <div class="feature">
-            <div class="feature-icon">⚡</div>
+            <div class="feature-icon">
+              <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="#4F46E5" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <polyline points="12 6 12 12 16 14"/>
+              </svg>
+            </div>
             <h3>实时更新</h3>
-            <p>热榜每分钟自动更新，智能体随时待命</p>
+            <p>热榜每分钟自动刷新</p>
           </div>
           <div class="feature">
-            <div class="feature-icon">🎯</div>
-            <h3>精准聚合</h3>
-            <p>45+ 平台数据源，多维度分类筛选</p>
+            <div class="feature-icon">
+              <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="#4F46E5" stroke-width="2">
+                <rect x="3" y="3" width="7" height="7" rx="1"/>
+                <rect x="14" y="3" width="7" height="7" rx="1"/>
+                <rect x="3" y="14" width="7" height="7" rx="1"/>
+                <rect x="14" y="14" width="7" height="7" rx="1"/>
+              </svg>
+            </div>
+            <h3>多源聚合</h3>
+            <p>45+ 平台数据整合</p>
           </div>
           <div class="feature">
-            <div class="feature-icon">🧠</div>
-            <h3>AI 增强</h3>
-            <p>智能对话、深度分析、趋势预测</p>
+            <div class="feature-icon">
+              <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="#4F46E5" stroke-width="2">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+              </svg>
+            </div>
+            <h3>智能对话</h3>
+            <p>与 AI 助手实时交流</p>
           </div>
           <div class="feature">
-            <div class="feature-icon">📱</div>
+            <div class="feature-icon">
+              <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="#4F46E5" stroke-width="2">
+                <rect x="5" y="2" width="14" height="20" rx="2"/>
+                <line x1="12" y1="18" x2="12" y2="18"/>
+              </svg>
+            </div>
             <h3>多端适配</h3>
-            <p>响应式设计，手机、平板、PC 都好用</p>
+            <p>手机、平板、电脑都能用</p>
           </div>
         </div>
       </div>
@@ -129,17 +196,16 @@
       <div class="container">
         <div class="footer-content">
           <div class="footer-brand">
-            <img src="/logo.svg" alt="知枢" height="24" />
-            <p>让智能触手可及</p>
+            <svg class="logo-mark" viewBox="0 0 32 32" width="20" height="20">
+              <circle cx="16" cy="16" r="14" fill="none" stroke="#999" stroke-width="1.5"/>
+              <circle cx="16" cy="12" r="2.5" fill="#999"/>
+              <circle cx="10" cy="20" r="1.5" fill="#999"/>
+              <circle cx="22" cy="20" r="1.5" fill="#999"/>
+            </svg>
+            <span>知枢</span>
           </div>
-          <div class="footer-links">
-            <a href="/agents">智能体</a>
-            <a href="/tgmeng">热榜</a>
-            <a href="#features">特性</a>
-          </div>
-          <div class="footer-copyright">
-            © 2026 知枢 · Powered by Vue + FastAPI
-          </div>
+          <p class="footer-slogan">让智能触手可及</p>
+          <p class="footer-copy">© 2026 知枢</p>
         </div>
       </div>
     </footer>
@@ -147,22 +213,21 @@
 </template>
 
 <style scoped>
-/* 全局 */
+/* 基础 */
 .home {
   min-height: 100vh;
   background: #fafafa;
 }
 
 .container {
-  max-width: 1100px;
+  max-width: 1000px;
   margin: 0 auto;
   padding: 0 24px;
 }
 
 /* 头部 */
 .header {
-  background: rgba(255,255,255,0.8);
-  backdrop-filter: blur(10px);
+  background: #fff;
   border-bottom: 1px solid #eee;
   position: sticky;
   top: 0;
@@ -173,7 +238,24 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 64px;
+  height: 60px;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: #1a1a1a;
+}
+
+.logo-mark {
+  color: #4F46E5;
+}
+
+.logo-text {
+  font-size: 18px;
+  font-weight: 600;
 }
 
 .nav-links {
@@ -188,31 +270,28 @@
 }
 
 .nav-links a:hover {
-  color: #333;
+  color: #1a1a1a;
 }
 
 .nav-actions {
   display: flex;
-  gap: 12px;
+  align-items: center;
+  gap: 16px;
 }
 
-.btn-outline {
-  padding: 8px 20px;
-  border: 1px solid #ddd;
-  border-radius: 6px;
+.btn-text {
   color: #666;
   text-decoration: none;
   font-size: 14px;
 }
 
-.btn-outline:hover {
-  border-color: #667eea;
-  color: #667eea;
+.btn-text:hover {
+  color: #1a1a1a;
 }
 
 .btn-primary {
   padding: 8px 20px;
-  background: linear-gradient(135deg, #667eea, #764ba2);
+  background: #1a1a1a;
   color: #fff;
   border-radius: 6px;
   text-decoration: none;
@@ -220,193 +299,201 @@
 }
 
 .btn-primary:hover {
-  opacity: 0.9;
+  background: #333;
 }
 
 /* Hero */
 .hero {
-  padding: 80px 0;
+  padding: 60px 0;
 }
 
 .hero .container {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 60px;
+  gap: 48px;
   align-items: center;
 }
 
-.hero-badge {
-  display: inline-block;
-  padding: 6px 16px;
-  background: linear-gradient(135deg, rgba(102,126,234,0.1), rgba(118,75,162,0.1));
-  color: #667eea;
-  border-radius: 20px;
-  font-size: 13px;
-  margin-bottom: 20px;
-}
-
 .hero-title {
-  font-size: 48px;
-  font-weight: 700;
+  font-size: 42px;
+  font-weight: 600;
   color: #1a1a1a;
-  margin: 0 0 20px;
+  margin: 0 0 16px;
   line-height: 1.2;
 }
 
-.gradient-text {
-  display: block;
-  background: linear-gradient(135deg, #667eea, #764ba2);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+.highlight {
+  color: #4F46E5;
 }
 
 .hero-desc {
-  font-size: 18px;
+  font-size: 16px;
   color: #666;
-  margin: 0 0 32px;
   line-height: 1.6;
+  margin: 0 0 28px;
 }
 
 .hero-actions {
   display: flex;
-  gap: 16px;
-  margin-bottom: 48px;
+  gap: 12px;
 }
 
 .btn-large {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 14px 28px;
+  padding: 12px 24px;
   border-radius: 8px;
   text-decoration: none;
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 500;
 }
 
-.hero-stats {
-  display: flex;
-  gap: 48px;
+.btn-large.btn-primary {
+  background: #1a1a1a;
+  color: #fff;
 }
 
-.stat-num {
-  font-size: 28px;
-  font-weight: 700;
+.btn-large.btn-outline {
+  border: 1px solid #ddd;
+  color: #666;
+}
+
+.btn-large.btn-outline:hover {
+  border-color: #1a1a1a;
   color: #1a1a1a;
 }
 
-.stat-label {
-  font-size: 13px;
-  color: #999;
-  margin-top: 4px;
-}
-
-/* Visual */
+/* Visual Card */
 .visual-card {
-  background: #1a1a1a;
+  background: #fff;
   border-radius: 12px;
+  border: 1px solid #eee;
   overflow: hidden;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.15);
 }
 
 .visual-header {
-  padding: 12px 16px;
-  background: #2a2a2a;
+  padding: 16px 20px;
+  border-bottom: 1px solid #eee;
   display: flex;
-  gap: 8px;
+  justify-content: space-between;
+  align-items: center;
 }
 
-.dot {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-}
-
-.dot.red { background: #ff5f56; }
-.dot.yellow { background: #ffbd2e; }
-.dot.green { background: #27ca40; }
-
-.visual-content {
-  padding: 24px;
-  font-family: 'SF Mono', Monaco, monospace;
+.card-title {
   font-size: 14px;
-  line-height: 1.8;
-  color: #e0e0e0;
+  font-weight: 500;
+  color: #1a1a1a;
 }
 
-.code-line {}
-.indent { padding-left: 24px; }
-.keyword { color: #c792ea; }
-.string { color: #c3e88d; }
-.number { color: #f78c6c; }
+.view-all {
+  font-size: 13px;
+  color: #4F46E5;
+  text-decoration: none;
+}
+
+.visual-list {
+  padding: 8px;
+}
+
+.visual-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.visual-item:hover {
+  background: #f5f5f5;
+}
+
+.item-icon {
+  width: 44px;
+  height: 44px;
+  background: #f5f5f5;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.item-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: #1a1a1a;
+  margin-bottom: 2px;
+}
+
+.item-desc {
+  font-size: 12px;
+  color: #999;
+}
 
 /* Products */
 .products {
-  padding: 80px 0;
+  padding: 60px 0;
 }
 
 .section-title {
-  font-size: 32px;
+  font-size: 28px;
   font-weight: 600;
   text-align: center;
-  margin: 0 0 48px;
+  margin: 0 0 40px;
 }
 
 .products-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 24px;
+  gap: 20px;
 }
 
 .product-card {
+  display: block;
+  padding: 28px;
   background: #fff;
-  border-radius: 16px;
-  padding: 32px;
+  border: 1px solid #eee;
+  border-radius: 12px;
   text-decoration: none;
   color: inherit;
-  border: 1px solid #eee;
-  transition: all 0.3s;
+  transition: border-color 0.2s;
 }
 
 .product-card:hover {
-  border-color: #667eea;
-  box-shadow: 0 8px 30px rgba(102,126,234,0.1);
+  border-color: #ccc;
 }
 
 .product-icon {
-  font-size: 40px;
   margin-bottom: 16px;
 }
 
 .product-card h3 {
-  font-size: 20px;
-  margin: 0 0 12px;
+  font-size: 17px;
+  margin: 0 0 8px;
 }
 
 .product-card p {
   font-size: 14px;
   color: #666;
   margin: 0;
-  line-height: 1.6;
 }
 
-.product-arrow {
-  display: inline-block;
+.card-arrow {
   margin-top: 16px;
-  color: #667eea;
-  font-size: 18px;
+  color: #ccc;
 }
 
 /* Features */
 .features {
-  padding: 80px 0;
+  padding: 60px 0;
   background: #fff;
 }
 
 .features-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 32px;
+  gap: 24px;
 }
 
 .feature {
@@ -414,13 +501,19 @@
 }
 
 .feature-icon {
-  font-size: 32px;
-  margin-bottom: 16px;
+  width: 56px;
+  height: 56px;
+  background: #F5F3FF;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 12px;
 }
 
 .feature h3 {
-  font-size: 16px;
-  margin: 0 0 8px;
+  font-size: 15px;
+  margin: 0 0 6px;
 }
 
 .feature p {
@@ -431,43 +524,41 @@
 
 /* Footer */
 .footer {
-  padding: 48px 0;
+  padding: 40px 0;
   border-top: 1px solid #eee;
 }
 
 .footer-content {
+  text-align: center;
+}
+
+.footer-brand {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 8px;
 }
 
-.footer-brand p {
-  font-size: 12px;
-  color: #999;
-  margin: 8px 0 0;
-}
-
-.footer-links {
-  display: flex;
-  gap: 24px;
-}
-
-.footer-links a {
+.footer-brand span {
+  font-size: 15px;
+  font-weight: 500;
   color: #666;
-  text-decoration: none;
-  font-size: 14px;
 }
 
-.footer-links a:hover {
-  color: #333;
+.footer-slogan {
+  font-size: 13px;
+  color: #999;
+  margin: 0 0 8px;
 }
 
-.footer-copyright {
+.footer-copy {
   font-size: 12px;
   color: #bbb;
+  margin: 0;
 }
 
-/* 响应式 */
+/* Responsive */
 @media (max-width: 768px) {
   .nav-links { display: none; }
   
@@ -476,31 +567,17 @@
     text-align: center;
   }
   
-  .hero-title { font-size: 36px; }
+  .hero-title { font-size: 32px; }
   
   .hero-actions {
     flex-direction: column;
     align-items: center;
   }
   
-  .hero-stats {
-    justify-content: center;
-  }
-  
   .hero-visual { display: none; }
   
-  .products-grid {
-    grid-template-columns: 1fr;
-  }
+  .products-grid { grid-template-columns: 1fr; }
   
-  .features-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-  
-  .footer-content {
-    flex-direction: column;
-    gap: 24px;
-    text-align: center;
-  }
+  .features-grid { grid-template-columns: repeat(2, 1fr); }
 }
 </style>
