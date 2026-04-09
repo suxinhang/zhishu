@@ -16,45 +16,38 @@
       </div>
     </header>
 
-    <!-- 快捷入口 -->
-    <div class="quick-access">
+    <!-- 数据源选择 -->
+    <nav class="source-nav">
       <div class="container">
-        <div class="quick-list">
+        <div class="source-list">
           <button 
-            v-for="item in quickList" 
-            :key="item.id"
-            @click="selectSource(item.id)"
-            :class="['quick-btn', { active: currentSource === item.id }]"
-          >
-            {{ item.name }}
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <!-- 分类标签 -->
-    <nav class="categories">
-      <div class="container">
-        <div class="cat-tabs">
-          <button 
-            v-for="cat in categories" 
-            :key="cat.id"
-            @click="activeCategory = cat.id"
-            :class="['cat-tab', { active: activeCategory === cat.id }]"
-          >
-            {{ cat.name }}
-          </button>
-        </div>
-        
-        <div class="cat-sources">
-          <button 
-            v-for="item in currentCategorySources" 
+            v-for="item in visibleSources" 
             :key="item.id"
             @click="selectSource(item.id)"
             :class="['source-btn', { active: currentSource === item.id }]"
           >
             {{ item.name }}
           </button>
+          
+          <div class="more-wrap">
+            <button @click="showMore = !showMore" class="more-btn">
+              更多
+              <svg viewBox="0 0 12 12" width="12" height="12" fill="currentColor">
+                <path d="M2 4l4 4 4-4"/>
+              </svg>
+            </button>
+            
+            <div v-if="showMore" class="more-dropdown">
+              <button 
+                v-for="item in moreSources" 
+                :key="item.id"
+                @click="selectSource(item.id); showMore = false"
+                :class="['dropdown-item', { active: currentSource === item.id }]"
+              >
+                {{ item.name }}
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </nav>
@@ -103,90 +96,49 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 
 const API_BASE = '/api/hot'
 
-// 快捷入口
-const quickList = ref([
+// 所有数据源
+const allSources = ref([
   { id: 'weibo', name: '微博' },
   { id: 'zhihu', name: '知乎' },
   { id: 'douyin', name: '抖音' },
   { id: 'bilibili', name: 'B站' },
   { id: 'toutiao', name: '头条' },
   { id: 'baidu', name: '百度' },
+  { id: 'kuaishou', name: '快手' },
+  { id: 'tieba', name: '贴吧' },
+  { id: '36kr', name: '36氪' },
+  { id: 'ithome', name: 'IT之家' },
+  { id: 'csdn', name: 'CSDN' },
+  { id: 'juejin', name: '掘金' },
+  { id: 'v2ex', name: 'V2EX' },
+  { id: 'github', name: 'GitHub' },
+  { id: 'hackernews', name: 'Hacker News' },
+  { id: 'sspai', name: '少数派' },
+  { id: 'douban-movie', name: '豆瓣电影' },
+  { id: 'douban-group', name: '豆瓣小组' },
+  { id: 'hupu', name: '虎扑' },
+  { id: 'ngabbs', name: 'NGA' },
+  { id: 'coolapk', name: '酷安' },
+  { id: 'sina', name: '新浪' },
+  { id: 'thepaper', name: '澎湃' },
+  { id: 'jianshu', name: '简书' },
+  { id: 'guokr', name: '果壳' },
+  { id: 'zhihu-daily', name: '知乎日报' },
 ])
 
-// 分类
-const categories = ref([
-  { id: 'all', name: '全部' },
-  { id: 'tech', name: '科技' },
-  { id: 'finance', name: '财经' },
-  { id: 'entertainment', name: '娱乐' },
-  { id: 'game', name: '游戏' },
-  { id: 'community', name: '社区' },
-])
-
-// 所有数据源
-const allSources = ref({
-  all: [
-    { id: 'weibo', name: '微博' },
-    { id: 'zhihu', name: '知乎' },
-    { id: 'baidu', name: '百度' },
-    { id: 'douyin', name: '抖音' },
-    { id: 'toutiao', name: '头条' },
-    { id: 'bilibili', name: 'B站' },
-    { id: 'kuaishou', name: '快手' },
-    { id: 'tieba', name: '贴吧' },
-  ],
-  tech: [
-    { id: '36kr', name: '36氪' },
-    { id: 'ithome', name: 'IT之家' },
-    { id: 'csdn', name: 'CSDN' },
-    { id: 'juejin', name: '掘金' },
-    { id: 'v2ex', name: 'V2EX' },
-    { id: 'github', name: 'GitHub' },
-    { id: 'hackernews', name: 'Hacker News' },
-    { id: 'sspai', name: '少数派' },
-    { id: 'geekpark', name: '极客公园' },
-    { id: 'linuxdo', name: 'Linux.do' },
-  ],
-  finance: [
-    { id: 'sina', name: '新浪' },
-    { id: 'thepaper', name: '澎湃新闻' },
-    { id: 'netease-news', name: '网易新闻' },
-  ],
-  entertainment: [
-    { id: 'douban-movie', name: '豆瓣电影' },
-    { id: 'douban-group', name: '豆瓣小组' },
-    { id: 'hupu', name: '虎扑' },
-    { id: 'acfun', name: 'AcFun' },
-  ],
-  game: [
-    { id: 'ngabbs', name: 'NGA' },
-    { id: 'yystv', name: '游研社' },
-    { id: 'genshin', name: '原神' },
-    { id: 'starrail', name: '星穹铁道' },
-    { id: 'honkai', name: '崩坏3' },
-    { id: 'miyoushe', name: '米游社' },
-  ],
-  community: [
-    { id: 'coolapk', name: '酷安' },
-    { id: 'jianshu', name: '简书' },
-    { id: 'smzdm', name: '什么值得买' },
-    { id: 'zhihu-daily', name: '知乎日报' },
-    { id: 'guokr', name: '果壳' },
-  ],
-})
+// 显示的（前6个）
+const visibleSources = computed(() => allSources.value.slice(0, 6))
+// 更多的（其余）
+const moreSources = computed(() => allSources.value.slice(6))
 
 const currentSource = ref('weibo')
 const currentData = ref(null)
 const hotList = ref([])
-const activeCategory = ref('all')
-
-const currentCategorySources = computed(() => {
-  return allSources.value[activeCategory.value] || []
-})
+const showMore = ref(false)
 
 const formatTime = (t) => {
   if (!t) return ''
@@ -212,8 +164,20 @@ const selectSource = (source) => {
   loadData(source)
 }
 
+// 点击外部关闭下拉
+const closeMore = (e) => {
+  if (!e.target.closest('.more-wrap')) {
+    showMore.value = false
+  }
+}
+
 onMounted(() => {
   loadData('weibo')
+  document.addEventListener('click', closeMore)
+})
+
+onUnmounted(() => {
+  document.removeEventListener('click', closeMore)
 })
 </script>
 
@@ -263,42 +227,8 @@ onMounted(() => {
   text-decoration: none;
 }
 
-/* 快捷入口 */
-.quick-access {
-  background: #fff;
-  padding: 12px 0;
-  border-bottom: 1px solid #eee;
-}
-
-.quick-list {
-  display: flex;
-  gap: 8px;
-  overflow-x: auto;
-}
-
-.quick-btn {
-  padding: 8px 16px;
-  background: #f5f5f5;
-  border: none;
-  border-radius: 20px;
-  font-size: 13px;
-  color: #666;
-  cursor: pointer;
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-
-.quick-btn:hover {
-  background: #eee;
-}
-
-.quick-btn.active {
-  background: #1a1a1a;
-  color: #fff;
-}
-
-/* 分类 */
-.categories {
+/* 数据源选择 */
+.source-nav {
   background: #fff;
   padding: 12px 0;
   border-bottom: 1px solid #eee;
@@ -307,67 +237,88 @@ onMounted(() => {
   z-index: 99;
 }
 
-.cat-tabs {
+.source-list {
   display: flex;
-  gap: 0;
-  border-bottom: 1px solid #eee;
-  margin-bottom: 12px;
-}
-
-.cat-tab {
-  padding: 10px 20px;
-  background: none;
-  border: none;
-  font-size: 14px;
-  color: #666;
-  cursor: pointer;
-  position: relative;
-}
-
-.cat-tab:hover {
-  color: #1a1a1a;
-}
-
-.cat-tab.active {
-  color: #1a1a1a;
-  font-weight: 500;
-}
-
-.cat-tab.active::after {
-  content: '';
-  position: absolute;
-  bottom: -1px;
-  left: 16px;
-  right: 16px;
-  height: 2px;
-  background: #1a1a1a;
-}
-
-.cat-sources {
-  display: flex;
-  flex-wrap: wrap;
+  align-items: center;
   gap: 8px;
 }
 
 .source-btn {
-  padding: 6px 14px;
+  padding: 8px 16px;
+  background: #f5f5f5;
+  border: none;
+  border-radius: 20px;
+  font-size: 13px;
+  color: #666;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.source-btn:hover {
+  background: #eee;
+}
+
+.source-btn.active {
+  background: #1a1a1a;
+  color: #fff;
+}
+
+/* 更多按钮 */
+.more-wrap {
+  position: relative;
+}
+
+.more-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 14px;
   background: #fff;
   border: 1px solid #ddd;
-  border-radius: 16px;
-  font-size: 12px;
+  border-radius: 20px;
+  font-size: 13px;
   color: #666;
   cursor: pointer;
 }
 
-.source-btn:hover {
-  border-color: #4F46E5;
-  color: #4F46E5;
+.more-btn:hover {
+  border-color: #999;
 }
 
-.source-btn.active {
-  background: #4F46E5;
-  border-color: #4F46E5;
-  color: #fff;
+.more-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 4px;
+  background: #fff;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  min-width: 120px;
+  max-height: 300px;
+  overflow-y: auto;
+  z-index: 100;
+}
+
+.dropdown-item {
+  display: block;
+  width: 100%;
+  padding: 10px 16px;
+  background: none;
+  border: none;
+  text-align: left;
+  font-size: 13px;
+  color: #666;
+  cursor: pointer;
+}
+
+.dropdown-item:hover {
+  background: #f5f5f5;
+}
+
+.dropdown-item.active {
+  color: #4F46E5;
+  font-weight: 500;
 }
 
 /* 信息 */
@@ -481,18 +432,8 @@ onMounted(() => {
 
 /* 响应式 */
 @media (max-width: 600px) {
-  .cat-tabs {
+  .source-list {
     overflow-x: auto;
-  }
-  
-  .cat-tab {
-    padding: 10px 14px;
-    white-space: nowrap;
-  }
-  
-  .cat-sources {
-    overflow-x: auto;
-    flex-wrap: nowrap;
   }
   
   .source-btn {
