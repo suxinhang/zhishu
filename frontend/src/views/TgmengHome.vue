@@ -38,14 +38,17 @@
             </button>
             
             <div v-if="showMore" class="more-dropdown">
-              <button 
-                v-for="item in moreSources" 
-                :key="item.id"
-                @click="selectSource(item.id); showMore = false"
-                :class="['dropdown-item', { active: currentSource === item.id }]"
-              >
-                {{ item.name }}
-              </button>
+              <template v-for="(items, groupName) in moreSourcesGrouped" :key="groupName">
+                <div class="dropdown-group">{{ groupName }}</div>
+                <button 
+                  v-for="item in items" 
+                  :key="item.id"
+                  @click="selectSource(item.id); showMore = false"
+                  :class="['dropdown-item', { active: currentSource === item.id }]"
+                >
+                  {{ item.name }}
+                </button>
+              </template>
             </div>
           </div>
         </div>
@@ -100,40 +103,47 @@ import { ref, computed, onMounted, onUnmounted } from 'vue'
 
 const API_BASE = '/api/hot'
 
-// 所有数据源
+// 所有数据源（分组）
 const allSources = ref([
-  { id: 'weibo', name: '微博' },
-  { id: 'zhihu', name: '知乎' },
-  { id: 'douyin', name: '抖音' },
-  { id: 'bilibili', name: 'B站' },
-  { id: 'toutiao', name: '头条' },
-  { id: 'baidu', name: '百度' },
-  { id: 'kuaishou', name: '快手' },
-  { id: 'tieba', name: '贴吧' },
-  { id: '36kr', name: '36氪' },
-  { id: 'ithome', name: 'IT之家' },
-  { id: 'csdn', name: 'CSDN' },
-  { id: 'juejin', name: '掘金' },
-  { id: 'v2ex', name: 'V2EX' },
-  { id: 'github', name: 'GitHub' },
-  { id: 'hackernews', name: 'Hacker News' },
-  { id: 'sspai', name: '少数派' },
-  { id: 'douban-movie', name: '豆瓣电影' },
-  { id: 'douban-group', name: '豆瓣小组' },
-  { id: 'hupu', name: '虎扑' },
-  { id: 'ngabbs', name: 'NGA' },
-  { id: 'coolapk', name: '酷安' },
-  { id: 'sina', name: '新浪' },
-  { id: 'thepaper', name: '澎湃' },
-  { id: 'jianshu', name: '简书' },
-  { id: 'guokr', name: '果壳' },
-  { id: 'zhihu-daily', name: '知乎日报' },
+  { id: 'weibo', name: '微博', group: '热门' },
+  { id: 'zhihu', name: '知乎', group: '热门' },
+  { id: 'douyin', name: '抖音', group: '热门' },
+  { id: 'bilibili', name: 'B站', group: '热门' },
+  { id: 'toutiao', name: '头条', group: '热门' },
+  { id: 'baidu', name: '百度', group: '热门' },
+  { id: 'kuaishou', name: '快手', group: '热门' },
+  { id: 'tieba', name: '贴吧', group: '热门' },
+  { id: '36kr', name: '36氪', group: '科技' },
+  { id: 'ithome', name: 'IT之家', group: '科技' },
+  { id: 'csdn', name: 'CSDN', group: '科技' },
+  { id: 'juejin', name: '掘金', group: '科技' },
+  { id: 'v2ex', name: 'V2EX', group: '科技' },
+  { id: 'github', name: 'GitHub', group: '科技' },
+  { id: 'hackernews', name: 'Hacker News', group: '科技' },
+  { id: 'sspai', name: '少数派', group: '科技' },
+  { id: 'douban-movie', name: '豆瓣电影', group: '娱乐' },
+  { id: 'douban-group', name: '豆瓣小组', group: '娱乐' },
+  { id: 'hupu', name: '虎扑', group: '娱乐' },
+  { id: 'ngabbs', name: 'NGA', group: '游戏' },
+  { id: 'coolapk', name: '酷安', group: '社区' },
+  { id: 'sina', name: '新浪', group: '财经' },
+  { id: 'thepaper', name: '澎湃', group: '财经' },
+  { id: 'jianshu', name: '简书', group: '社区' },
+  { id: 'guokr', name: '果壳', group: '社区' },
+  { id: 'zhihu-daily', name: '知乎日报', group: '社区' },
 ])
 
 // 显示的（前6个）
 const visibleSources = computed(() => allSources.value.slice(0, 6))
-// 更多的（其余）
-const moreSources = computed(() => allSources.value.slice(6))
+// 更多的（分组）
+const moreSourcesGrouped = computed(() => {
+  const groups = {}
+  allSources.value.slice(6).forEach(item => {
+    if (!groups[item.group]) groups[item.group] = []
+    groups[item.group].push(item)
+  })
+  return groups
+})
 
 const currentSource = ref('weibo')
 const currentData = ref(null)
@@ -319,6 +329,23 @@ onUnmounted(() => {
 .dropdown-item.active {
   color: #4F46E5;
   font-weight: 500;
+  background: #f0f4ff;
+}
+
+.dropdown-group {
+  padding: 8px 16px 4px;
+  font-size: 11px;
+  color: #999;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-top: 1px solid #eee;
+  margin-top: 4px;
+}
+
+.dropdown-group:first-child {
+  border-top: none;
+  margin-top: 0;
 }
 
 /* 信息 */
