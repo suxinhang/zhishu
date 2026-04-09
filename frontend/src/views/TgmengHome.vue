@@ -12,79 +12,35 @@
           </svg>
           <span class="logo-text">知枢热榜</span>
         </a>
-        <a href="/" class="back-link">返回首页</a>
+        <span class="update-time">{{ updateTime }}</span>
       </div>
     </header>
 
-    <!-- 数据源选择 -->
-    <nav class="source-nav">
-      <div class="container">
-        <div class="source-list">
-          <button 
-            v-for="item in visibleSources" 
-            :key="item.id"
-            @click="selectSource(item.id)"
-            :class="['source-btn', { active: currentSource === item.id }]"
-          >
-            {{ item.name }}
-          </button>
-          
-          <div class="more-wrap">
-            <button @click="showMore = !showMore" class="more-btn">
-              更多
-              <svg viewBox="0 0 12 12" width="12" height="12" fill="currentColor">
-                <path d="M2 4l4 4 4-4"/>
-              </svg>
-            </button>
-            
-            <div v-if="showMore" class="more-dropdown">
-              <template v-for="(items, groupName) in moreSourcesGrouped" :key="groupName">
-                <div class="dropdown-group">{{ groupName }}</div>
-                <button 
-                  v-for="item in items" 
-                  :key="item.id"
-                  @click="selectSource(item.id); showMore = false"
-                  :class="['dropdown-item', { active: currentSource === item.id }]"
-                >
-                  {{ item.name }}
-                </button>
-              </template>
-            </div>
-          </div>
-        </div>
-      </div>
-    </nav>
-
-    <!-- 热榜信息 -->
-    <div class="source-info" v-if="currentData">
-      <div class="container">
-        <h1>{{ currentData.title }}</h1>
-        <span class="update-time">{{ formatTime(currentData.updateTime) }}</span>
-      </div>
-    </div>
-
-    <!-- 列表 -->
+    <!-- 热榜网格 -->
     <main class="main">
       <div class="container">
-        <div class="list">
-          <a 
-            v-for="(item, idx) in hotList" 
-            :key="item.id"
-            :href="item.url"
-            target="_blank"
-            class="list-item"
-          >
-            <div class="item-rank">
-              <span v-if="idx < 3" :class="['rank-badge', 'rank-' + (idx + 1)]">{{ idx + 1 }}</span>
-              <span v-else class="rank-num">{{ idx + 1 }}</span>
+        <div class="hot-grid">
+          <div v-for="source in displaySources" :key="source.id" class="hot-card">
+            <div class="card-header">
+              <h2 class="card-title">{{ source.name }}</h2>
+              <a :href="source.link" target="_blank" class="card-link">更多 →</a>
             </div>
-            <div class="item-content">
-              <h3 class="item-title">{{ item.title }}</h3>
+            <div class="card-list">
+              <a 
+                v-for="(item, idx) in source.items" 
+                :key="item.id"
+                :href="item.url"
+                target="_blank"
+                class="list-item"
+              >
+                <span class="item-rank" :class="'rank-' + (idx + 1)">{{ idx + 1 }}</span>
+                <span class="item-title">{{ item.title }}</span>
+              </a>
+              <div v-if="!source.items || source.items.length === 0" class="loading">
+                加载中...
+              </div>
             </div>
-            <svg class="item-arrow" viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="#ccc" stroke-width="1.5">
-              <path d="M6 4l4 4-4 4"/>
-            </svg>
-          </a>
+          </div>
         </div>
       </div>
     </main>
@@ -99,95 +55,46 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted } from 'vue'
 
 const API_BASE = '/api/hot'
 
-// 所有数据源（分组）
-const allSources = ref([
-  { id: 'weibo', name: '微博', group: '热门' },
-  { id: 'zhihu', name: '知乎', group: '热门' },
-  { id: 'douyin', name: '抖音', group: '热门' },
-  { id: 'bilibili', name: 'B站', group: '热门' },
-  { id: 'toutiao', name: '头条', group: '热门' },
-  { id: 'baidu', name: '百度', group: '热门' },
-  { id: 'kuaishou', name: '快手', group: '热门' },
-  { id: 'tieba', name: '贴吧', group: '热门' },
-  { id: '36kr', name: '36氪', group: '科技' },
-  { id: 'ithome', name: 'IT之家', group: '科技' },
-  { id: 'csdn', name: 'CSDN', group: '科技' },
-  { id: 'juejin', name: '掘金', group: '科技' },
-  { id: 'v2ex', name: 'V2EX', group: '科技' },
-  { id: 'github', name: 'GitHub', group: '科技' },
-  { id: 'hackernews', name: 'Hacker News', group: '科技' },
-  { id: 'sspai', name: '少数派', group: '科技' },
-  { id: 'douban-movie', name: '豆瓣电影', group: '娱乐' },
-  { id: 'douban-group', name: '豆瓣小组', group: '娱乐' },
-  { id: 'hupu', name: '虎扑', group: '娱乐' },
-  { id: 'ngabbs', name: 'NGA', group: '游戏' },
-  { id: 'coolapk', name: '酷安', group: '社区' },
-  { id: 'sina', name: '新浪', group: '财经' },
-  { id: 'thepaper', name: '澎湃', group: '财经' },
-  { id: 'jianshu', name: '简书', group: '社区' },
-  { id: 'guokr', name: '果壳', group: '社区' },
-  { id: 'zhihu-daily', name: '知乎日报', group: '社区' },
+// 要显示的数据源
+const displaySources = ref([
+  { id: 'weibo', name: '微博', link: 'https://s.weibo.com/top/summary/', items: [] },
+  { id: 'zhihu', name: '知乎', link: 'https://www.zhihu.com/hot', items: [] },
+  { id: 'douyin', name: '抖音', link: 'https://www.douyin.com/hot', items: [] },
+  { id: 'bilibili', name: 'B站', link: 'https://www.bilibili.com/v/popular/rank/all', items: [] },
+  { id: 'toutiao', name: '头条', link: 'https://www.toutiao.com/', items: [] },
+  { id: 'baidu', name: '百度', link: 'https://top.baidu.com/board', items: [] },
+  { id: 'kuaishou', name: '快手', link: 'https://www.kuaishou.com/hot', items: [] },
+  { id: 'tieba', name: '贴吧', link: 'https://tieba.baidu.com/hottopic', items: [] },
 ])
 
-// 显示的（前6个）
-const visibleSources = computed(() => allSources.value.slice(0, 6))
-// 更多的（分组）
-const moreSourcesGrouped = computed(() => {
-  const groups = {}
-  allSources.value.slice(6).forEach(item => {
-    if (!groups[item.group]) groups[item.group] = []
-    groups[item.group].push(item)
-  })
-  return groups
-})
+const updateTime = ref('')
 
-const currentSource = ref('weibo')
-const currentData = ref(null)
-const hotList = ref([])
-const showMore = ref(false)
-
-const formatTime = (t) => {
-  if (!t) return ''
-  const d = new Date(t)
-  return d.getHours() + ':' + String(d.getMinutes()).padStart(2, '0')
-}
-
-const loadData = async (source) => {
-  try {
-    const res = await fetch(`${API_BASE}/${source}`)
-    const json = await res.json()
-    if (json.code === 200) {
-      currentData.value = json
-      hotList.value = json.data || []
-    }
-  } catch (e) {
-    console.error('加载失败:', e)
-  }
-}
-
-const selectSource = (source) => {
-  currentSource.value = source
-  loadData(source)
-}
-
-// 点击外部关闭下拉
-const closeMore = (e) => {
-  if (!e.target.closest('.more-wrap')) {
-    showMore.value = false
-  }
+const loadAllData = async () => {
+  const time = new Date()
+  updateTime.value = time.getHours() + ':' + String(time.getMinutes()).padStart(2, '0')
+  
+  // 并行加载所有数据源
+  await Promise.all(
+    displaySources.value.map(async (source) => {
+      try {
+        const res = await fetch(`${API_BASE}/${source.id}`)
+        const json = await res.json()
+        if (json.code === 200 && json.data) {
+          source.items = json.data.slice(0, 5) // 每个平台只显示前5条
+        }
+      } catch (e) {
+        console.error(`加载 ${source.name} 失败:`, e)
+      }
+    })
+  )
 }
 
 onMounted(() => {
-  loadData('weibo')
-  document.addEventListener('click', closeMore)
-})
-
-onUnmounted(() => {
-  document.removeEventListener('click', closeMore)
+  loadAllData()
 })
 </script>
 
@@ -195,11 +102,11 @@ onUnmounted(() => {
 /* 基础 */
 .hot-page {
   min-height: 100vh;
-  background: #fafafa;
+  background: #f5f5f5;
 }
 
 .container {
-  max-width: 800px;
+  max-width: 1200px;
   margin: 0 auto;
   padding: 0 16px;
 }
@@ -231,166 +138,64 @@ onUnmounted(() => {
 .logo-mark { color: #4F46E5; }
 .logo-text { font-size: 15px; font-weight: 600; }
 
-.back-link {
-  font-size: 13px;
-  color: #666;
-  text-decoration: none;
-}
-
-/* 数据源选择 */
-.source-nav {
-  background: #fff;
-  padding: 12px 0;
-  border-bottom: 1px solid #eee;
-  position: sticky;
-  top: 52px;
-  z-index: 99;
-}
-
-.source-list {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.source-btn {
-  padding: 8px 16px;
-  background: #f5f5f5;
-  border: none;
-  border-radius: 20px;
-  font-size: 13px;
-  color: #666;
-  cursor: pointer;
-  white-space: nowrap;
-}
-
-.source-btn:hover {
-  background: #eee;
-}
-
-.source-btn.active {
-  background: #1a1a1a;
-  color: #fff;
-}
-
-/* 更多按钮 */
-.more-wrap {
-  position: relative;
-}
-
-.more-btn {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  padding: 8px 14px;
-  background: #fff;
-  border: 1px solid #ddd;
-  border-radius: 20px;
-  font-size: 13px;
-  color: #666;
-  cursor: pointer;
-}
-
-.more-btn:hover {
-  border-color: #999;
-}
-
-.more-dropdown {
-  position: absolute;
-  top: 100%;
-  right: 0;
-  margin-top: 4px;
-  background: #fff;
-  border: 1px solid #eee;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-  min-width: 120px;
-  max-height: 300px;
-  overflow-y: auto;
-  z-index: 100;
-}
-
-.dropdown-item {
-  display: block;
-  width: 100%;
-  padding: 10px 16px;
-  background: none;
-  border: none;
-  text-align: left;
-  font-size: 13px;
-  color: #666;
-  cursor: pointer;
-}
-
-.dropdown-item:hover {
-  background: #f5f5f5;
-}
-
-.dropdown-item.active {
-  color: #4F46E5;
-  font-weight: 500;
-  background: #f0f4ff;
-}
-
-.dropdown-group {
-  padding: 8px 16px 4px;
-  font-size: 11px;
-  color: #999;
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  border-top: 1px solid #eee;
-  margin-top: 4px;
-}
-
-.dropdown-group:first-child {
-  border-top: none;
-  margin-top: 0;
-}
-
-/* 信息 */
-.source-info {
-  padding: 16px 0;
-}
-
-.source-info .container {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.source-info h1 {
-  font-size: 16px;
-  margin: 0;
-}
-
 .update-time {
   font-size: 12px;
   color: #999;
 }
 
-/* 列表 */
+/* 热榜网格 */
 .main {
-  padding: 16px 0;
+  padding: 20px 0;
 }
 
-.list {
+.hot-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+/* 卡片 */
+.hot-card {
   background: #fff;
-  border-radius: 12px;
-  border: 1px solid #eee;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 16px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.card-title {
+  font-size: 14px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.card-link {
+  font-size: 12px;
+  color: #999;
+  text-decoration: none;
+}
+
+.card-link:hover {
+  color: #4F46E5;
+}
+
+/* 列表 */
+.card-list {
+  padding: 8px 0;
 }
 
 .list-item {
   display: flex;
-  align-items: center;
-  padding: 14px 16px;
-  border-bottom: 1px solid #f5f5f5;
+  align-items: flex-start;
+  padding: 10px 16px;
   text-decoration: none;
-  color: inherit;
-}
-
-.list-item:last-child {
-  border-bottom: none;
+  color: #1a1a1a;
 }
 
 .list-item:hover {
@@ -402,51 +207,37 @@ onUnmounted(() => {
 }
 
 .item-rank {
-  width: 24px;
-  flex-shrink: 0;
-}
-
-.rank-badge {
-  display: inline-flex;
+  width: 18px;
+  height: 18px;
+  display: flex;
   align-items: center;
   justify-content: center;
-  width: 20px;
-  height: 20px;
-  border-radius: 5px;
   font-size: 11px;
   font-weight: 600;
-}
-
-.rank-badge.rank-1 { background: #F59E0B; color: #fff; }
-.rank-badge.rank-2 { background: #9CA3AF; color: #fff; }
-.rank-badge.rank-3 { background: #B45309; color: #fff; }
-
-.rank-num {
   color: #999;
-  font-size: 13px;
-  font-weight: 500;
+  flex-shrink: 0;
 }
 
-.item-content {
-  flex: 1;
-  padding: 0 12px;
-}
+.item-rank.rank-1 { color: #F59E0B; }
+.item-rank.rank-2 { color: #9CA3AF; }
+.item-rank.rank-3 { color: #B45309; }
 
 .item-title {
-  font-size: 14px;
-  color: #1a1a1a;
-  margin: 0;
+  font-size: 13px;
+  line-height: 1.4;
+  margin-left: 10px;
   transition: color 0.2s;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
-.item-arrow {
-  flex-shrink: 0;
-  opacity: 0;
-  transition: opacity 0.2s;
-}
-
-.list-item:hover .item-arrow {
-  opacity: 1;
+.loading {
+  padding: 20px;
+  text-align: center;
+  color: #999;
+  font-size: 13px;
 }
 
 /* Footer */
@@ -458,13 +249,15 @@ onUnmounted(() => {
 }
 
 /* 响应式 */
-@media (max-width: 600px) {
-  .source-list {
-    overflow-x: auto;
+@media (max-width: 900px) {
+  .hot-grid {
+    grid-template-columns: repeat(2, 1fr);
   }
-  
-  .source-btn {
-    flex-shrink: 0;
+}
+
+@media (max-width: 600px) {
+  .hot-grid {
+    grid-template-columns: 1fr;
   }
 }
 </style>
