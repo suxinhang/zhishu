@@ -24,14 +24,20 @@ onMounted(() => {
   if (saved) {
     isDark.value = saved === 'true'
   } else {
-    // 默认跟随系统
     isDark.value = window.matchMedia('(prefers-color-scheme: dark)').matches
   }
+  updateTheme()
 })
 
-watch(isDark, (val) => {
-  localStorage.setItem('darkMode', val)
+watch(isDark, () => {
+  updateTheme()
 })
+
+const updateTheme = () => {
+  localStorage.setItem('darkMode', isDark.value)
+  // 更新 html 根元素的 class
+  document.documentElement.classList.toggle('dark', isDark.value)
+}
 
 const toggleDark = () => {
   isDark.value = !isDark.value
@@ -39,8 +45,8 @@ const toggleDark = () => {
 </script>
 
 <style>
-/* 暗黑模式变量 */
-.app {
+/* 全局变量 - 定义在 :root */
+:root {
   --bg: #f5f5f5;
   --bg-card: #fff;
   --text: #1a1a1a;
@@ -50,7 +56,8 @@ const toggleDark = () => {
   --primary: #4F46E5;
 }
 
-.app.dark {
+/* 暗黑模式 - 定义在 html.dark */
+html.dark {
   --bg: #1a1a1a;
   --bg-card: #262626;
   --text: #f5f5f5;
@@ -61,10 +68,17 @@ const toggleDark = () => {
 }
 
 /* 全局样式 */
-body {
+html, body {
+  margin: 0;
+  padding: 0;
   background: var(--bg);
   color: var(--text);
   transition: background 0.3s, color 0.3s;
+}
+
+#app {
+  min-height: 100vh;
+  background: var(--bg);
 }
 
 /* 导航 */
@@ -98,7 +112,7 @@ body {
 }
 
 .dark-btn {
-  background: transparent;
+  background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: 8px;
   padding: 4px 12px;
