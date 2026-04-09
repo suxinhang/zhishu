@@ -60,8 +60,8 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 
-// API 基础地址 - 使用公开 API
-const API_BASE = 'https://api-hot.imsyy.top'
+// API 基础地址 - 通过 nginx 代理访问
+const API_BASE = '/api/hot'
 
 // 数据源列表
 const categories = ref([
