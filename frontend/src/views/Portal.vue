@@ -217,6 +217,18 @@
 .home {
   min-height: 100vh;
   background: #fafafa;
+  position: relative;
+}
+
+.home::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 400px;
+  background: linear-gradient(180deg, #f0f4ff 0%, #fafafa 100%);
+  z-index: 0;
 }
 
 .container {
@@ -305,6 +317,8 @@
 /* Hero */
 .hero {
   padding: 60px 0;
+  position: relative;
+  z-index: 1;
 }
 
 .hero .container {
@@ -434,6 +448,8 @@
 /* Products */
 .products {
   padding: 60px 0;
+  position: relative;
+  z-index: 1;
 }
 
 .section-title {
@@ -526,6 +542,9 @@
 .footer {
   padding: 40px 0;
   border-top: 1px solid #eee;
+  background: #fff;
+  position: relative;
+  z-index: 1;
 }
 
 .footer-content {
