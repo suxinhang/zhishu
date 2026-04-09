@@ -1,298 +1,725 @@
 <template>
-  <div class="min-h-screen bg-gray-50">
-    <!-- 搜索区域 -->
-    <div class="bg-white border-b border-gray-200">
-      <div class="max-w-6xl mx-auto px-6 py-8">
-        <!-- Logo + 搜索 -->
-        <div class="flex items-center gap-6 mb-6">
-          <div class="flex items-center gap-3">
-            <span class="text-3xl">🔥</span>
-            <h1 class="text-2xl font-bold text-gray-800">知枢热榜</h1>
+  <div class="agents-page">
+    <!-- 头部 -->
+    <header class="header">
+      <div class="container">
+        <div class="nav">
+          <a href="/" class="logo">
+            <img src="/logo.svg" alt="知枢" height="28" />
+          </a>
+          <div class="nav-tabs">
+            <span class="active">智能体</span>
+            <a href="/tgmeng">热榜</a>
           </div>
-          <div class="flex-1 max-w-xl">
-            <div class="relative">
-              <input 
-                v-model="searchQuery"
-                type="text"
-                placeholder="搜索热点..."
-                class="w-full px-4 py-2.5 pl-10 bg-gray-100 rounded-full text-sm outline-none focus:bg-white focus:ring-2 focus:ring-orange-300 transition"
-                @input="filterTopics"
-              />
-              <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400">🔍</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- 搜索区 -->
+    <section class="search-section">
+      <div class="container">
+        <div class="search-box">
+          <div class="search-icon">🔍</div>
+          <input 
+            v-model="searchQuery"
+            type="text"
+            placeholder="搜索智能体能力、场景..."
+            @input="doSearch"
+          />
+          <div class="search-hot">
+            <span>热门：</span>
+            <button @click="searchQuery = '写作'">写作</button>
+            <button @click="searchQuery = '编程'">编程</button>
+            <button @click="searchQuery = '翻译'">翻译</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 分类区 -->
+    <section class="categories">
+      <div class="container">
+        <div class="category-scroll">
+          <button 
+            @click="selectCategory(null)"
+            :class="['cat-btn', { active: !selectedCategory }]"
+          >
+            全部
+          </button>
+          <button 
+            v-for="cat in categories" 
+            :key="cat.id"
+            @click="selectCategory(cat.id)"
+            :class="['cat-btn', { active: selectedCategory === cat.id }]"
+          >
+            {{ cat.icon }} {{ cat.name }}
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 推荐区 -->
+    <section class="featured" v-if="!searchQuery && featuredAgents.length > 0">
+      <div class="container">
+        <div class="section-header">
+          <h2>🔥 热门推荐</h2>
+          <p>最受欢迎的智能体</p>
+        </div>
+        <div class="featured-grid">
+          <div 
+            v-for="agent in featuredAgents" 
+            :key="agent.id"
+            class="featured-card"
+            @click="goToChat(agent)"
+          >
+            <div class="featured-icon">{{ agent.icon }}</div>
+            <div class="featured-info">
+              <h3>{{ agent.name }}</h3>
+              <p>{{ agent.description }}</p>
+              <div class="featured-meta">
+                <span class="rating">⭐ {{ agent.rating }}</span>
+                <span class="users">👥 {{ formatNum(agent.users) }} 人使用</span>
+              </div>
+            </div>
+            <div class="featured-arrow">→</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 智能体列表 -->
+    <section class="agents-list">
+      <div class="container">
+        <div class="section-header">
+          <h2>{{ searchQuery ? '搜索结果' : '全部智能体' }}</h2>
+          <div class="sort-btns">
+            <button @click="sortBy('hot')" :class="{ active: sort === 'hot' }">最热</button>
+            <button @click="sortBy('rating')" :class="{ active: sort === 'rating' }">评分</button>
+            <button @click="sortBy('new')" :class="{ active: sort === 'new' }">最新</button>
+          </div>
+        </div>
+        
+        <div class="agents-grid">
+          <div 
+            v-for="agent in filteredAgents" 
+            :key="agent.id"
+            class="agent-card"
+            @click="goToDetail(agent)"
+          >
+            <div class="card-header">
+              <div class="agent-icon">{{ agent.icon }}</div>
+              <div class="agent-badge" v-if="agent.isNew">NEW</div>
+            </div>
+            <div class="card-body">
+              <h3>{{ agent.name }}</h3>
+              <p>{{ agent.description }}</p>
+              <div class="card-tags">
+                <span class="tag">{{ agent.category }}</span>
+                <span class="tag">{{ agent.scenario }}</span>
+              </div>
+            </div>
+            <div class="card-footer">
+              <div class="card-stats">
+                <span>⭐ {{ agent.rating }}</span>
+                <span>{{ formatNum(agent.users) }}人</span>
+              </div>
+              <button class="chat-btn" @click.stop="goToChat(agent)">对话</button>
             </div>
           </div>
         </div>
-        
-        <!-- 平台标签 -->
-        <div class="flex items-center gap-2 flex-wrap">
-          <button 
-            v-for="plat in platforms"
-            :key="plat.id"
-            @click="selectPlatform(plat.id)"
-            :class="[
-              'px-4 py-2 rounded-full text-sm font-medium transition-all duration-200',
-              selectedPlatform === plat.id 
-                ? 'bg-orange-500 text-white shadow-md' 
-                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-            ]"
-          >
-            {{ plat.icon }} {{ plat.name }}
-          </button>
-          <button 
-            @click="selectPlatform(null)"
-            :class="[
-              'px-4 py-2 rounded-full text-sm font-medium transition-all duration-200',
-              selectedPlatform === null 
-                ? 'bg-gray-800 text-white shadow-md' 
-                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-            ]"
-          >
-            📋 全部
-          </button>
-        </div>
-      </div>
-    </div>
-    
-    <!-- 热点列表 -->
-    <div class="max-w-6xl mx-auto px-6 py-6">
-      <!-- 分类筛选 -->
-      <div class="flex items-center gap-3 mb-4 text-sm">
-        <span class="text-gray-500">分类：</span>
-        <button 
-          v-for="cat in categories"
-          :key="cat.id"
-          @click="selectCategory(cat.id)"
-          :class="[
-            'px-3 py-1 rounded transition',
-            selectedCategory === cat.id 
-              ? 'bg-blue-500 text-white' 
-              : 'text-gray-600 hover:text-blue-500'
-          ]"
-        >
-          {{ cat.icon }} {{ cat.name }}
-        </button>
-        <button 
-          @click="selectCategory(null)"
-          :class="[
-            'px-3 py-1 rounded transition',
-            selectedCategory === null 
-              ? 'bg-blue-500 text-white' 
-              : 'text-gray-600 hover:text-blue-500'
-          ]"
-        >
-          全部
-        </button>
-      </div>
-      
-      <!-- 热点表格 -->
-      <div class="bg-white rounded-xl shadow-sm overflow-hidden">
-        <table class="w-full">
-          <thead class="bg-gray-50 text-sm text-gray-500">
-            <tr>
-              <th class="w-16 px-4 py-3 text-left font-medium">排名</th>
-              <th class="px-4 py-3 text-left font-medium">热点</th>
-              <th class="w-32 px-4 py-3 text-left font-medium">热度</th>
-              <th class="w-24 px-4 py-3 text-right font-medium">来源</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr 
-              v-for="(topic, idx) in filteredTopics" 
-              :key="topic.id"
-              @click="goToTopic(topic.id)"
-              class="border-t border-gray-100 hover:bg-orange-50 cursor-pointer transition-colors group"
-            >
-              <!-- 排名 -->
-              <td class="px-4 py-4">
-                <span 
-                  :class="[
-                    'inline-flex items-center justify-center w-7 h-7 rounded-lg text-sm font-bold',
-                    idx < 3 ? 'bg-gradient-to-br from-orange-400 to-red-500 text-white' : 'bg-gray-100 text-gray-600'
-                  ]"
-                >
-                  {{ idx + 1 }}
-                </span>
-              </td>
-              
-              <!-- 标题 -->
-              <td class="px-4 py-4">
-                <span class="text-gray-800 group-hover:text-orange-600 font-medium transition">
-                  {{ topic.title }}
-                </span>
-                <span v-if="topic.summary" class="ml-2 text-xs text-gray-400 line-clamp-1 inline-block max-w-md">
-                  {{ topic.summary }}
-                </span>
-              </td>
-              
-              <!-- 热度 -->
-              <td class="px-4 py-4">
-                <div class="flex items-center gap-2">
-                  <div class="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
-                    <div 
-                      class="h-full bg-gradient-to-r from-orange-400 to-red-500 rounded-full transition-all duration-500"
-                      :style="{ width: getHotPercent(topic.hot_value) + '%' }"
-                    ></div>
-                  </div>
-                  <span class="text-sm text-gray-500 w-16 text-right">{{ formatHotValue(topic.hot_value) }}</span>
-                </div>
-              </td>
-              
-              <!-- 来源 -->
-              <td class="px-4 py-4 text-right">
-                <span class="inline-flex items-center gap-1 text-sm text-gray-500">
-                  <span>{{ topic.platform_icon }}</span>
-                  <span>{{ topic.platform_name }}</span>
-                </span>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-        
+
         <!-- 空状态 -->
-        <div v-if="filteredTopics.length === 0" class="text-center py-16 text-gray-400">
-          <span class="text-4xl mb-4 block">🔍</span>
-          <p>暂无匹配的热点</p>
+        <div v-if="filteredAgents.length === 0" class="empty">
+          <div class="empty-icon">🔍</div>
+          <p>未找到相关智能体</p>
+          <button @click="searchQuery = ''">查看全部</button>
         </div>
       </div>
-      
-      <!-- 底部信息 -->
-      <div class="mt-6 text-center text-sm text-gray-400">
-        <p>🔥 知枢热榜 · 数据每30分钟更新一次</p>
+    </section>
+
+    <!-- 能力说明 -->
+    <section class="capabilities">
+      <div class="container">
+        <h2>💡 智能体能力</h2>
+        <div class="cap-grid">
+          <div class="cap-card">
+            <div class="cap-icon">✍️</div>
+            <h3>内容创作</h3>
+            <p>文案写作、小说创作、公文写作、营销策划</p>
+          </div>
+          <div class="cap-card">
+            <div class="cap-icon">💻</div>
+            <h3>编程开发</h3>
+            <p>代码生成、Bug修复、架构设计、代码审查</p>
+          </div>
+          <div class="cap-card">
+            <div class="cap-icon">🌐</div>
+            <h3>语言翻译</h3>
+            <p>多语言互译、文档翻译、口语对话</p>
+          </div>
+          <div class="cap-card">
+            <div class="cap-icon">🎨</div>
+            <h3>创意设计</h3>
+            <p>UI设计、海报生成、Logo设计、插画创作</p>
+          </div>
+          <div class="cap-card">
+            <div class="cap-icon">📊</div>
+            <h3>数据分析</h3>
+            <p>数据可视化、报表生成、趋势分析</p>
+          </div>
+          <div class="cap-card">
+            <div class="cap-icon">🎯</div>
+            <h3>学习辅导</h3>
+            <p>知识问答、作业辅导、考试备考</p>
+          </div>
+        </div>
       </div>
-    </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <div class="container">
+        <p>🧠 知枢 · 让智能触手可及</p>
+      </div>
+    </footer>
   </div>
 </template>
 
-<script setup lang="ts">
+<script setup>
 import { ref, computed, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
 
-interface Platform {
-  id: number
-  name: string
-  icon: string
-}
+// 模拟数据
+const categories = ref([
+  { id: 1, name: '写作', icon: '✍️' },
+  { id: 2, name: '编程', icon: '💻' },
+  { id: 3, name: '翻译', icon: '🌐' },
+  { id: 4, name: '设计', icon: '🎨' },
+  { id: 5, name: '学习', icon: '📚' },
+  { id: 6, name: '效率', icon: '⚡' },
+  { id: 7, name: '娱乐', icon: '🎮' },
+])
 
-interface Category {
-  id: number
-  name: string
-  icon: string
-}
+const agents = ref([
+  { id: 1, name: '文案大师', icon: '✍️', description: '专业文案创作，一键生成营销文案', category: '写作', scenario: '营销', rating: 4.9, users: 12580, isNew: true },
+  { id: 2, name: '代码助手', icon: '💻', description: '智能编程助手，代码生成与优化', category: '编程', scenario: '开发', rating: 4.8, users: 8960, isNew: false },
+  { id: 3, name: '翻译官', icon: '🌐', description: '支持100+语言精准翻译', category: '翻译', scenario: '多语言', rating: 4.7, users: 15320, isNew: false },
+  { id: 4, name: '设计精灵', icon: '🎨', description: 'AI设计助手，快速生成设计稿', category: '设计', scenario: 'UI设计', rating: 4.6, users: 6740, isNew: true },
+  { id: 5, name: '论文帮手', icon: '📚', description: '学术写作辅助，论文润色优化', category: '学习', scenario: '学术', rating: 4.8, users: 9850, isNew: false },
+  { id: 6, name: 'PPT大师', icon: '📊', description: '一键生成精美PPT演示文稿', category: '效率', scenario: '办公', rating: 4.5, users: 11200, isNew: false },
+  { id: 7, name: '情感陪伴', icon: '❤️', description: '温暖陪伴，倾听你的心事', category: '娱乐', scenario: '陪伴', rating: 4.9, users: 18900, isNew: false },
+  { id: 8, name: '简历优化师', icon: '📄', description: '专业简历优化，提升求职竞争力', category: '效率', scenario: '求职', rating: 4.7, users: 7650, isNew: true },
+  { id: 9, name: '小说创作', icon: '📖', description: '创意故事生成，小说情节设计', category: '写作', scenario: '创作', rating: 4.6, users: 5430, isNew: false },
+  { id: 10, name: 'SQL专家', icon: '🗄️', description: 'SQL语句生成与优化', category: '编程', scenario: '数据库', rating: 4.8, users: 4320, isNew: false },
+  { id: 11, name: '口语教练', icon: '🗣️', description: '英语口语练习与纠正', category: '学习', scenario: '语言', rating: 4.5, users: 8900, isNew: false },
+  { id: 12, name: '公文写作', icon: '📝', description: '政府公文、商务文档生成', category: '写作', scenario: '公文', rating: 4.7, users: 6780, isNew: false },
+])
 
-interface Topic {
-  id: number
-  title: string
-  platform_id: number
-  platform_name: string
-  platform_icon: string
-  category_id: number
-  category_name: string
-  category_icon: string
-  hot_value: number
-  rank: number
-  url: string
-  summary: string
-}
-
-const topics = ref<Topic[]>([])
-const platforms = ref<Platform[]>([])
-const categories = ref<Category[]>([])
 const searchQuery = ref('')
-const selectedPlatform = ref<number | null>(null)
-const selectedCategory = ref<number | null>(null)
-const maxHot = ref(0)
-const router = useRouter()
+const selectedCategory = ref(null)
+const sort = ref('hot')
 
-const formatHotValue = (value: number) => {
-  if (value >= 1000000) return (value / 1000000).toFixed(1) + 'M'
-  if (value >= 1000) return (value / 1000).toFixed(0) + 'K'
-  return value.toString()
-}
+const featuredAgents = computed(() => {
+  return [...agents.value]
+    .sort((a, b) => b.users - a.users)
+    .slice(0, 3)
+})
 
-const getHotPercent = (value: number) => {
-  if (maxHot.value === 0) return 0
-  return Math.round((value / maxHot.value) * 100)
-}
-
-const filteredTopics = computed(() => {
-  let result = topics.value
+const filteredAgents = computed(() => {
+  let result = agents.value
+  
+  if (selectedCategory.value) {
+    result = result.filter(a => a.category === categories.value.find(c => c.id === selectedCategory.value)?.name)
+  }
   
   if (searchQuery.value) {
-    const query = searchQuery.value.toLowerCase()
-    result = result.filter(t => 
-      t.title.toLowerCase().includes(query) ||
-      (t.summary && t.summary.toLowerCase().includes(query))
+    const q = searchQuery.value.toLowerCase()
+    result = result.filter(a => 
+      a.name.toLowerCase().includes(q) ||
+      a.description.toLowerCase().includes(q) ||
+      a.category.toLowerCase().includes(q) ||
+      a.scenario.toLowerCase().includes(q)
     )
+  }
+  
+  if (sort.value === 'hot') {
+    result = [...result].sort((a, b) => b.users - a.users)
+  } else if (sort.value === 'rating') {
+    result = [...result].sort((a, b) => b.rating - a.rating)
   }
   
   return result
 })
 
-const filterTopics = () => {
-  // 搜索触发
+const formatNum = n => n >= 10000 ? (n/10000).toFixed(1) + 'w' : n >= 1000 ? (n/1000).toFixed(1) + 'k' : n
+
+const selectCategory = id => {
+  selectedCategory.value = selectedCategory.value === id ? null : id
 }
 
-const selectPlatform = (platId: number | null) => {
-  selectedPlatform.value = platId
-  loadTopics()
+const sortBy = s => {
+  sort.value = s
 }
 
-const selectCategory = (catId: number | null) => {
-  selectedCategory.value = catId
-  loadTopics()
+const doSearch = () => {}
+
+const goToDetail = agent => {
+  window.location.href = `/agents/${agent.id}`
 }
 
-const goToTopic = (id: number) => {
-  router.push(`/topic/${id}`)
+const goToChat = agent => {
+  window.location.href = `/chat/${agent.id}`
 }
-
-const loadTopics = async () => {
-  try {
-    const params = new URLSearchParams()
-    if (selectedPlatform.value) params.append('platform', selectedPlatform.value.toString())
-    if (selectedCategory.value) params.append('category', selectedCategory.value.toString())
-    params.append('sort', 'hot')
-    
-    const res = await fetch(`/api/topics?${params}`)
-    topics.value = await res.json()
-    
-    // 计算最大热度
-    if (topics.value.length > 0) {
-      maxHot.value = Math.max(...topics.value.map(t => t.hot_value))
-    }
-  } catch (e) {
-    console.error('Failed to load topics:', e)
-  }
-}
-
-const loadPlatforms = async () => {
-  try {
-    const res = await fetch('/api/platforms')
-    platforms.value = await res.json()
-  } catch (e) {
-    console.error('Failed to load platforms:', e)
-  }
-}
-
-const loadCategories = async () => {
-  try {
-    const res = await fetch('/api/categories')
-    categories.value = await res.json()
-  } catch (e) {
-    console.error('Failed to load categories:', e)
-  }
-}
-
-onMounted(async () => {
-  await Promise.all([loadTopics(), loadPlatforms(), loadCategories()])
-})
 </script>
 
 <style scoped>
-.line-clamp-1 {
-  display: -webkit-box;
-  -webkit-line-clamp: 1;
-  -webkit-box-orient: vertical;
+.agents-page {
+  min-height: 100vh;
+  background: #f8f9fa;
+}
+
+.container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+/* Header */
+.header {
+  background: #fff;
+  border-bottom: 1px solid #eee;
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 56px;
+}
+
+.nav-tabs {
+  display: flex;
+  gap: 24px;
+}
+
+.nav-tabs a, .nav-tabs span {
+  color: #666;
+  text-decoration: none;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.nav-tabs .active {
+  color: #667eea;
+  font-weight: 500;
+}
+
+/* Search */
+.search-section {
+  padding: 40px 0 20px;
+  background: linear-gradient(180deg, #fff 0%, #f8f9fa 100%);
+}
+
+.search-box {
+  position: relative;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.search-box input {
+  width: 100%;
+  padding: 16px 20px 16px 50px;
+  border: 2px solid #eee;
+  border-radius: 12px;
+  font-size: 16px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.search-box input:focus {
+  border-color: #667eea;
+}
+
+.search-icon {
+  position: absolute;
+  left: 18px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 18px;
+}
+
+.search-hot {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: #999;
+}
+
+.search-hot button {
+  padding: 4px 10px;
+  background: #f0f0f0;
+  border: none;
+  border-radius: 12px;
+  font-size: 12px;
+  color: #666;
+  cursor: pointer;
+}
+
+.search-hot button:hover {
+  background: #667eea;
+  color: #fff;
+}
+
+/* Categories */
+.categories {
+  padding: 20px 0;
+  background: #f8f9fa;
+}
+
+.category-scroll {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding-bottom: 10px;
+}
+
+.cat-btn {
+  padding: 8px 20px;
+  background: #fff;
+  border: 1px solid #eee;
+  border-radius: 20px;
+  font-size: 14px;
+  color: #666;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s;
+}
+
+.cat-btn:hover {
+  border-color: #667eea;
+  color: #667eea;
+}
+
+.cat-btn.active {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: #fff;
+  border-color: transparent;
+}
+
+/* Featured */
+.featured {
+  padding: 40px 0;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.section-header h2 {
+  font-size: 20px;
+  margin: 0;
+}
+
+.section-header p {
+  margin: 0;
+  color: #999;
+  font-size: 14px;
+}
+
+.featured-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.featured-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px;
+  background: #fff;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.featured-card:hover {
+  box-shadow: 0 4px 20px rgba(102,126,234,0.15);
+}
+
+.featured-icon {
+  width: 56px;
+  height: 56px;
+  background: linear-gradient(135deg, #f0f2ff, #f8f0ff);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+}
+
+.featured-info {
+  flex: 1;
+}
+
+.featured-info h3 {
+  margin: 0 0 4px;
+  font-size: 16px;
+}
+
+.featured-info p {
+  margin: 0;
+  font-size: 13px;
+  color: #666;
+}
+
+.featured-meta {
+  margin-top: 8px;
+  font-size: 12px;
+  color: #999;
+}
+
+.featured-meta .rating {
+  color: #f5a623;
+}
+
+.featured-arrow {
+  color: #ccc;
+  font-size: 18px;
+}
+
+/* Agents Grid */
+.agents-list {
+  padding: 40px 0;
+}
+
+.sort-btns {
+  display: flex;
+  gap: 8px;
+}
+
+.sort-btns button {
+  padding: 6px 14px;
+  background: #fff;
+  border: 1px solid #eee;
+  border-radius: 16px;
+  font-size: 13px;
+  color: #666;
+  cursor: pointer;
+}
+
+.sort-btns button.active {
+  background: #667eea;
+  color: #fff;
+  border-color: #667eea;
+}
+
+.agents-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+.agent-card {
+  background: #fff;
+  border-radius: 12px;
   overflow: hidden;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.agent-card:hover {
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+}
+
+.card-header {
+  padding: 20px 16px 12px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.agent-icon {
+  width: 48px;
+  height: 48px;
+  background: linear-gradient(135deg, #f0f2ff, #f8f0ff);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+}
+
+.agent-badge {
+  padding: 2px 8px;
+  background: #ff6b6b;
+  color: #fff;
+  font-size: 10px;
+  border-radius: 8px;
+}
+
+.card-body {
+  padding: 0 16px 12px;
+}
+
+.card-body h3 {
+  margin: 0 0 6px;
+  font-size: 15px;
+}
+
+.card-body p {
+  margin: 0;
+  font-size: 12px;
+  color: #666;
+  line-height: 1.4;
+}
+
+.card-tags {
+  margin-top: 10px;
+  display: flex;
+  gap: 6px;
+}
+
+.tag {
+  padding: 3px 8px;
+  background: #f0f0f0;
+  border-radius: 4px;
+  font-size: 11px;
+  color: #666;
+}
+
+.card-footer {
+  padding: 12px 16px;
+  border-top: 1px solid #f5f5f5;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.card-stats {
+  font-size: 12px;
+  color: #999;
+}
+
+.card-stats span {
+  margin-right: 12px;
+}
+
+.chat-btn {
+  padding: 6px 16px;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: #fff;
+  border: none;
+  border-radius: 16px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+/* Empty */
+.empty {
+  text-align: center;
+  padding: 60px 0;
+}
+
+.empty-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+}
+
+.empty p {
+  color: #999;
+  margin: 0 0 16px;
+}
+
+.empty button {
+  padding: 10px 24px;
+  background: #667eea;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+/* Capabilities */
+.capabilities {
+  padding: 40px 0;
+  background: #fff;
+}
+
+.capabilities h2 {
+  text-align: center;
+  margin: 0 0 32px;
+  font-size: 24px;
+}
+
+.cap-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 16px;
+}
+
+.cap-card {
+  text-align: center;
+  padding: 24px 16px;
+  background: #f8f9fa;
+  border-radius: 12px;
+}
+
+.cap-icon {
+  font-size: 32px;
+  margin-bottom: 12px;
+}
+
+.cap-card h3 {
+  margin: 0 0 8px;
+  font-size: 14px;
+}
+
+.cap-card p {
+  margin: 0;
+  font-size: 12px;
+  color: #666;
+  line-height: 1.4;
+}
+
+/* Footer */
+.footer {
+  padding: 32px 0;
+  text-align: center;
+  color: #999;
+  font-size: 13px;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .featured-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .agents-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .cap-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .search-hot { display: none; }
+  
+  .agents-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .cap-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 </style>
