@@ -16,89 +16,45 @@
       </div>
     </header>
 
-    <!-- 分类组 -->
+    <!-- 快捷入口 -->
+    <div class="quick-access">
+      <div class="container">
+        <div class="quick-list">
+          <button 
+            v-for="item in quickList" 
+            :key="item.id"
+            @click="selectSource(item.id)"
+            :class="['quick-btn', { active: currentSource === item.id }]"
+          >
+            {{ item.name }}
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 分类标签 -->
     <nav class="categories">
       <div class="container">
-        <!-- 综合热门 -->
-        <div class="cat-group">
-          <div class="cat-title">综合热门</div>
-          <div class="cat-list">
-            <button @click="selectSource('weibo')" :class="['cat-btn', { active: currentSource === 'weibo' }]">微博</button>
-            <button @click="selectSource('zhihu')" :class="['cat-btn', { active: currentSource === 'zhihu' }]">知乎</button>
-            <button @click="selectSource('baidu')" :class="['cat-btn', { active: currentSource === 'baidu' }]">百度</button>
-            <button @click="selectSource('douyin')" :class="['cat-btn', { active: currentSource === 'douyin' }]">抖音</button>
-            <button @click="selectSource('toutiao')" :class="['cat-btn', { active: currentSource === 'toutiao' }]">头条</button>
-            <button @click="selectSource('bilibili')" :class="['cat-btn', { active: currentSource === 'bilibili' }]">B站</button>
-            <button @click="selectSource('kuaishou')" :class="['cat-btn', { active: currentSource === 'kuaishou' }]">快手</button>
-          </div>
+        <div class="cat-tabs">
+          <button 
+            v-for="cat in categories" 
+            :key="cat.id"
+            @click="activeCategory = cat.id"
+            :class="['cat-tab', { active: activeCategory === cat.id }]"
+          >
+            {{ cat.name }}
+          </button>
         </div>
-
-        <!-- 科技 -->
-        <div class="cat-group">
-          <div class="cat-title">科技</div>
-          <div class="cat-list">
-            <button @click="selectSource('36kr')" :class="['cat-btn', { active: currentSource === '36kr' }]">36氪</button>
-            <button @click="selectSource('ithome')" :class="['cat-btn', { active: currentSource === 'ithome' }]">IT之家</button>
-            <button @click="selectSource('csdn')" :class="['cat-btn', { active: currentSource === 'csdn' }]">CSDN</button>
-            <button @click="selectSource('juejin')" :class="['cat-btn', { active: currentSource === 'juejin' }]">掘金</button>
-            <button @click="selectSource('v2ex')" :class="['cat-btn', { active: currentSource === 'v2ex' }]">V2EX</button>
-            <button @click="selectSource('github')" :class="['cat-btn', { active: currentSource === 'github' }]">GitHub</button>
-            <button @click="selectSource('hackernews')" :class="['cat-btn', { active: currentSource === 'hackernews' }]">Hacker News</button>
-            <button @click="selectSource('sspai')" :class="['cat-btn', { active: currentSource === 'sspai' }]">少数派</button>
-            <button @click="selectSource('geekpark')" :class="['cat-btn', { active: currentSource === 'geekpark' }]">极客公园</button>
-          </div>
-        </div>
-
-        <!-- 财经 -->
-        <div class="cat-group">
-          <div class="cat-title">财经</div>
-          <div class="cat-list">
-            <button @click="selectSource('sina')" :class="['cat-btn', { active: currentSource === 'sina' }]">新浪</button>
-            <button @click="selectSource('thepaper')" :class="['cat-btn', { active: currentSource === 'thepaper' }]">澎湃新闻</button>
-          </div>
-        </div>
-
-        <!-- 娱乐 -->
-        <div class="cat-group">
-          <div class="cat-title">娱乐</div>
-          <div class="cat-list">
-            <button @click="selectSource('douban-movie')" :class="['cat-btn', { active: currentSource === 'douban-movie' }]">豆瓣电影</button>
-            <button @click="selectSource('douban-group')" :class="['cat-btn', { active: currentSource === 'douban-group' }]">豆瓣小组</button>
-            <button @click="selectSource('hupu')" :class="['cat-btn', { active: currentSource === 'hupu' }]">虎扑</button>
-          </div>
-        </div>
-
-        <!-- 游戏 -->
-        <div class="cat-group">
-          <div class="cat-title">游戏</div>
-          <div class="cat-list">
-            <button @click="selectSource('ngabbs')" :class="['cat-btn', { active: currentSource === 'ngabbs' }]">NGA</button>
-            <button @click="selectSource('yystv')" :class="['cat-btn', { active: currentSource === 'yystv' }]">游研社</button>
-            <button @click="selectSource('genshin')" :class="['cat-btn', { active: currentSource === 'genshin' }]">原神</button>
-            <button @click="selectSource('starrail')" :class="['cat-btn', { active: currentSource === 'starrail' }]">星铁</button>
-          </div>
-        </div>
-
-        <!-- 社区 -->
-        <div class="cat-group">
-          <div class="cat-title">社区</div>
-          <div class="cat-list">
-            <button @click="selectSource('tieba')" :class="['cat-btn', { active: currentSource === 'tieba' }]">贴吧</button>
-            <button @click="selectSource('coolapk')" :class="['cat-btn', { active: currentSource === 'coolapk' }]">酷安</button>
-            <button @click="selectSource('jianshu')" :class="['cat-btn', { active: currentSource === 'jianshu' }]">简书</button>
-            <button @click="selectSource('linuxdo')" :class="['cat-btn', { active: currentSource === 'linuxdo' }]">Linux.do</button>
-          </div>
-        </div>
-
-        <!-- 其他 -->
-        <div class="cat-group">
-          <div class="cat-title">其他</div>
-          <div class="cat-list">
-            <button @click="selectSource('zhihu-daily')" :class="['cat-btn', { active: currentSource === 'zhihu-daily' }]">知乎日报</button>
-            <button @click="selectSource('weread')" :class="['cat-btn', { active: currentSource === 'weread' }]">微信读书</button>
-            <button @click="selectSource('guokr')" :class="['cat-btn', { active: currentSource === 'guokr' }]">果壳</button>
-            <button @click="selectSource('history')" :class="['cat-btn', { active: currentSource === 'history' }]">历史上的今天</button>
-          </div>
+        
+        <div class="cat-sources">
+          <button 
+            v-for="item in currentCategorySources" 
+            :key="item.id"
+            @click="selectSource(item.id)"
+            :class="['source-btn', { active: currentSource === item.id }]"
+          >
+            {{ item.name }}
+          </button>
         </div>
       </div>
     </nav>
@@ -106,13 +62,8 @@
     <!-- 热榜信息 -->
     <div class="source-info" v-if="currentData">
       <div class="container">
-        <div class="info-left">
-          <h1>{{ currentData.title }}</h1>
-          <p>{{ currentData.description }}</p>
-        </div>
-        <div class="info-right">
-          <span class="update-time">{{ formatTime(currentData.updateTime) }}</span>
-        </div>
+        <h1>{{ currentData.title }}</h1>
+        <span class="update-time">{{ formatTime(currentData.updateTime) }}</span>
       </div>
     </div>
 
@@ -133,14 +84,10 @@
             </div>
             <div class="item-content">
               <h3 class="item-title">{{ item.title }}</h3>
-              <p class="item-desc" v-if="item.desc && item.desc !== item.title">{{ item.desc }}</p>
             </div>
-            <div class="item-meta">
-              <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="#999" stroke-width="1.5">
-                <path d="M8 1v8M4 5l4 4 4-4"/>
-                <path d="M2 11v2a1 1 0 001 1h10a1 1 0 001-1v-2"/>
-              </svg>
-            </div>
+            <svg class="item-arrow" viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="#ccc" stroke-width="1.5">
+              <path d="M6 4l4 4-4 4"/>
+            </svg>
           </a>
         </div>
       </div>
@@ -156,13 +103,90 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 
 const API_BASE = '/api/hot'
+
+// 快捷入口
+const quickList = ref([
+  { id: 'weibo', name: '微博' },
+  { id: 'zhihu', name: '知乎' },
+  { id: 'douyin', name: '抖音' },
+  { id: 'bilibili', name: 'B站' },
+  { id: 'toutiao', name: '头条' },
+  { id: 'baidu', name: '百度' },
+])
+
+// 分类
+const categories = ref([
+  { id: 'all', name: '全部' },
+  { id: 'tech', name: '科技' },
+  { id: 'finance', name: '财经' },
+  { id: 'entertainment', name: '娱乐' },
+  { id: 'game', name: '游戏' },
+  { id: 'community', name: '社区' },
+])
+
+// 所有数据源
+const allSources = ref({
+  all: [
+    { id: 'weibo', name: '微博' },
+    { id: 'zhihu', name: '知乎' },
+    { id: 'baidu', name: '百度' },
+    { id: 'douyin', name: '抖音' },
+    { id: 'toutiao', name: '头条' },
+    { id: 'bilibili', name: 'B站' },
+    { id: 'kuaishou', name: '快手' },
+    { id: 'tieba', name: '贴吧' },
+  ],
+  tech: [
+    { id: '36kr', name: '36氪' },
+    { id: 'ithome', name: 'IT之家' },
+    { id: 'csdn', name: 'CSDN' },
+    { id: 'juejin', name: '掘金' },
+    { id: 'v2ex', name: 'V2EX' },
+    { id: 'github', name: 'GitHub' },
+    { id: 'hackernews', name: 'Hacker News' },
+    { id: 'sspai', name: '少数派' },
+    { id: 'geekpark', name: '极客公园' },
+    { id: 'linuxdo', name: 'Linux.do' },
+  ],
+  finance: [
+    { id: 'sina', name: '新浪' },
+    { id: 'thepaper', name: '澎湃新闻' },
+    { id: 'netease-news', name: '网易新闻' },
+  ],
+  entertainment: [
+    { id: 'douban-movie', name: '豆瓣电影' },
+    { id: 'douban-group', name: '豆瓣小组' },
+    { id: 'hupu', name: '虎扑' },
+    { id: 'acfun', name: 'AcFun' },
+  ],
+  game: [
+    { id: 'ngabbs', name: 'NGA' },
+    { id: 'yystv', name: '游研社' },
+    { id: 'genshin', name: '原神' },
+    { id: 'starrail', name: '星穹铁道' },
+    { id: 'honkai', name: '崩坏3' },
+    { id: 'miyoushe', name: '米游社' },
+  ],
+  community: [
+    { id: 'coolapk', name: '酷安' },
+    { id: 'jianshu', name: '简书' },
+    { id: 'smzdm', name: '什么值得买' },
+    { id: 'zhihu-daily', name: '知乎日报' },
+    { id: 'guokr', name: '果壳' },
+  ],
+})
 
 const currentSource = ref('weibo')
 const currentData = ref(null)
 const hotList = ref([])
+const activeCategory = ref('all')
+
+const currentCategorySources = computed(() => {
+  return allSources.value[activeCategory.value] || []
+})
 
 const formatTime = (t) => {
   if (!t) return ''
@@ -203,7 +227,7 @@ onMounted(() => {
 .container {
   max-width: 800px;
   margin: 0 auto;
-  padding: 0 20px;
+  padding: 0 16px;
 }
 
 /* 头部 */
@@ -219,7 +243,7 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 56px;
+  height: 52px;
 }
 
 .logo {
@@ -230,14 +254,8 @@ onMounted(() => {
   color: #1a1a1a;
 }
 
-.logo-mark {
-  color: #4F46E5;
-}
-
-.logo-text {
-  font-size: 16px;
-  font-weight: 600;
-}
+.logo-mark { color: #4F46E5; }
+.logo-text { font-size: 15px; font-weight: 600; }
 
 .back-link {
   font-size: 13px;
@@ -245,78 +263,126 @@ onMounted(() => {
   text-decoration: none;
 }
 
-.back-link:hover {
-  color: #1a1a1a;
-}
-
-/* 分类组 */
-.categories {
+/* 快捷入口 */
+.quick-access {
   background: #fff;
+  padding: 12px 0;
   border-bottom: 1px solid #eee;
-  padding: 16px 0;
 }
 
-.cat-group {
-  margin-bottom: 12px;
-}
-
-.cat-group:last-child {
-  margin-bottom: 0;
-}
-
-.cat-title {
-  font-size: 12px;
-  color: #999;
-  margin-bottom: 8px;
-  font-weight: 500;
-}
-
-.cat-list {
+.quick-list {
   display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
+  gap: 8px;
+  overflow-x: auto;
 }
 
-.cat-btn {
-  padding: 6px 14px;
+.quick-btn {
+  padding: 8px 16px;
   background: #f5f5f5;
   border: none;
-  border-radius: 16px;
+  border-radius: 20px;
   font-size: 13px;
   color: #666;
   cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
-.cat-btn:hover {
+.quick-btn:hover {
   background: #eee;
 }
 
-.cat-btn.active {
+.quick-btn.active {
   background: #1a1a1a;
   color: #fff;
 }
 
-/* 数据源信息 */
-.source-info {
+/* 分类 */
+.categories {
   background: #fff;
-  padding: 20px 0;
+  padding: 12px 0;
   border-bottom: 1px solid #eee;
+  position: sticky;
+  top: 52px;
+  z-index: 99;
+}
+
+.cat-tabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid #eee;
+  margin-bottom: 12px;
+}
+
+.cat-tab {
+  padding: 10px 20px;
+  background: none;
+  border: none;
+  font-size: 14px;
+  color: #666;
+  cursor: pointer;
+  position: relative;
+}
+
+.cat-tab:hover {
+  color: #1a1a1a;
+}
+
+.cat-tab.active {
+  color: #1a1a1a;
+  font-weight: 500;
+}
+
+.cat-tab.active::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 16px;
+  right: 16px;
+  height: 2px;
+  background: #1a1a1a;
+}
+
+.cat-sources {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.source-btn {
+  padding: 6px 14px;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 16px;
+  font-size: 12px;
+  color: #666;
+  cursor: pointer;
+}
+
+.source-btn:hover {
+  border-color: #4F46E5;
+  color: #4F46E5;
+}
+
+.source-btn.active {
+  background: #4F46E5;
+  border-color: #4F46E5;
+  color: #fff;
+}
+
+/* 信息 */
+.source-info {
+  padding: 16px 0;
 }
 
 .source-info .container {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
+  align-items: center;
 }
 
-.info-left h1 {
-  font-size: 18px;
-  margin: 0 0 4px;
-}
-
-.info-left p {
-  font-size: 13px;
-  color: #666;
+.source-info h1 {
+  font-size: 16px;
   margin: 0;
 }
 
@@ -327,7 +393,7 @@ onMounted(() => {
 
 /* 列表 */
 .main {
-  padding: 20px 0;
+  padding: 16px 0;
 }
 
 .list {
@@ -338,7 +404,7 @@ onMounted(() => {
 
 .list-item {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   padding: 14px 16px;
   border-bottom: 1px solid #f5f5f5;
   text-decoration: none;
@@ -357,9 +423,8 @@ onMounted(() => {
   color: #4F46E5;
 }
 
-/* 排名 */
 .item-rank {
-  width: 28px;
+  width: 24px;
   flex-shrink: 0;
 }
 
@@ -367,66 +432,42 @@ onMounted(() => {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 22px;
-  height: 22px;
-  border-radius: 6px;
-  font-size: 12px;
+  width: 20px;
+  height: 20px;
+  border-radius: 5px;
+  font-size: 11px;
   font-weight: 600;
 }
 
-.rank-badge.rank-1 {
-  background: #F59E0B;
-  color: #fff;
-}
-
-.rank-badge.rank-2 {
-  background: #9CA3AF;
-  color: #fff;
-}
-
-.rank-badge.rank-3 {
-  background: #B45309;
-  color: #fff;
-}
+.rank-badge.rank-1 { background: #F59E0B; color: #fff; }
+.rank-badge.rank-2 { background: #9CA3AF; color: #fff; }
+.rank-badge.rank-3 { background: #B45309; color: #fff; }
 
 .rank-num {
   color: #999;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 500;
 }
 
-/* 内容 */
 .item-content {
   flex: 1;
-  padding: 0 16px;
+  padding: 0 12px;
 }
 
 .item-title {
   font-size: 14px;
-  font-weight: 500;
   color: #1a1a1a;
-  margin: 0 0 4px;
+  margin: 0;
   transition: color 0.2s;
 }
 
-.item-desc {
-  font-size: 12px;
-  color: #666;
-  margin: 0;
-  line-height: 1.4;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.item-meta {
+.item-arrow {
   flex-shrink: 0;
   opacity: 0;
   transition: opacity 0.2s;
 }
 
-.list-item:hover .item-meta {
+.list-item:hover .item-arrow {
   opacity: 1;
 }
 
@@ -440,13 +481,22 @@ onMounted(() => {
 
 /* 响应式 */
 @media (max-width: 600px) {
-  .source-info .container {
-    flex-direction: column;
-    gap: 8px;
+  .cat-tabs {
+    overflow-x: auto;
   }
   
-  .item-desc {
-    display: none;
+  .cat-tab {
+    padding: 10px 14px;
+    white-space: nowrap;
+  }
+  
+  .cat-sources {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+  }
+  
+  .source-btn {
+    flex-shrink: 0;
   }
 }
 </style>
