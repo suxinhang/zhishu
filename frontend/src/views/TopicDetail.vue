@@ -4,7 +4,7 @@
       <div class="header-inner">
         <a href="/tgmeng" class="logo">
           <span class="logo-icon">🍭</span>
-          <span class="logo-text">糖果梦热榜</span>
+          <span class="logo-text">知枢热榜</span>
         </a>
       </div>
     </header>

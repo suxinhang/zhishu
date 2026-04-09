@@ -37,24 +37,24 @@ const router = createRouter({
       meta: { title: '对话 - 知枢' }
     },
     
-    // 糖果梦热榜
+    // 知枢热榜
     {
       path: '/tgmeng',
       name: 'TgmengHome',
       component: () => import('../views/TgmengHome.vue'),
-      meta: { title: '糖果梦热榜' }
+      meta: { title: '知枢热榜' }
     },
     {
       path: '/tgmeng/category/:id',
       name: 'TgmengCategory',
       component: () => import('../views/TgmengCategory.vue'),
-      meta: { title: '分类 - 糖果梦热榜' }
+      meta: { title: '分类 - 知枢热榜' }
     },
     {
       path: '/tgmeng/topic/:id',
       name: 'TgmengTopic',
       component: () => import('../views/TgmengTopic.vue'),
-      meta: { title: '热点详情 - 糖果梦热榜' }
+      meta: { title: '热点详情 - 知枢热榜' }
     },
     
     // 404

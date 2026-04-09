@@ -5,7 +5,7 @@
       <div class="header-inner">
         <a href="/tgmeng" class="logo">
           <span class="logo-icon">🍭</span>
-          <span class="logo-text">糖果梦热榜</span>
+          <span class="logo-text">知枢热榜</span>
         </a>
         
         <!-- 分类 -->
@@ -51,7 +51,7 @@
 
     <!-- 底部 -->
     <div class="footer">
-      <p>🍭 糖果梦热榜 · 科技不该冰冷，人性不该傲慢</p>
+      <p>🍭 知枢热榜 · 科技不该冰冷，人性不该傲慢</p>
       <p class="footer-small">数据来源: 微博 · 知乎 · 抖音 · B站 等 45+ 平台实时聚合</p>
     </div>
   </div>
