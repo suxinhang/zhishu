@@ -16,18 +16,89 @@
       </div>
     </header>
 
-    <!-- 分类 -->
+    <!-- 分类组 -->
     <nav class="categories">
       <div class="container">
-        <div class="cat-scroll">
-          <button 
-            v-for="cat in categories" 
-            :key="cat.id"
-            @click="selectSource(cat.id)"
-            :class="['cat-btn', { active: currentSource === cat.id }]"
-          >
-            {{ cat.name }}
-          </button>
+        <!-- 综合热门 -->
+        <div class="cat-group">
+          <div class="cat-title">综合热门</div>
+          <div class="cat-list">
+            <button @click="selectSource('weibo')" :class="['cat-btn', { active: currentSource === 'weibo' }]">微博</button>
+            <button @click="selectSource('zhihu')" :class="['cat-btn', { active: currentSource === 'zhihu' }]">知乎</button>
+            <button @click="selectSource('baidu')" :class="['cat-btn', { active: currentSource === 'baidu' }]">百度</button>
+            <button @click="selectSource('douyin')" :class="['cat-btn', { active: currentSource === 'douyin' }]">抖音</button>
+            <button @click="selectSource('toutiao')" :class="['cat-btn', { active: currentSource === 'toutiao' }]">头条</button>
+            <button @click="selectSource('bilibili')" :class="['cat-btn', { active: currentSource === 'bilibili' }]">B站</button>
+            <button @click="selectSource('kuaishou')" :class="['cat-btn', { active: currentSource === 'kuaishou' }]">快手</button>
+          </div>
+        </div>
+
+        <!-- 科技 -->
+        <div class="cat-group">
+          <div class="cat-title">科技</div>
+          <div class="cat-list">
+            <button @click="selectSource('36kr')" :class="['cat-btn', { active: currentSource === '36kr' }]">36氪</button>
+            <button @click="selectSource('ithome')" :class="['cat-btn', { active: currentSource === 'ithome' }]">IT之家</button>
+            <button @click="selectSource('csdn')" :class="['cat-btn', { active: currentSource === 'csdn' }]">CSDN</button>
+            <button @click="selectSource('juejin')" :class="['cat-btn', { active: currentSource === 'juejin' }]">掘金</button>
+            <button @click="selectSource('v2ex')" :class="['cat-btn', { active: currentSource === 'v2ex' }]">V2EX</button>
+            <button @click="selectSource('github')" :class="['cat-btn', { active: currentSource === 'github' }]">GitHub</button>
+            <button @click="selectSource('hackernews')" :class="['cat-btn', { active: currentSource === 'hackernews' }]">Hacker News</button>
+            <button @click="selectSource('sspai')" :class="['cat-btn', { active: currentSource === 'sspai' }]">少数派</button>
+            <button @click="selectSource('geekpark')" :class="['cat-btn', { active: currentSource === 'geekpark' }]">极客公园</button>
+          </div>
+        </div>
+
+        <!-- 财经 -->
+        <div class="cat-group">
+          <div class="cat-title">财经</div>
+          <div class="cat-list">
+            <button @click="selectSource('sina')" :class="['cat-btn', { active: currentSource === 'sina' }]">新浪</button>
+            <button @click="selectSource('thepaper')" :class="['cat-btn', { active: currentSource === 'thepaper' }]">澎湃新闻</button>
+          </div>
+        </div>
+
+        <!-- 娱乐 -->
+        <div class="cat-group">
+          <div class="cat-title">娱乐</div>
+          <div class="cat-list">
+            <button @click="selectSource('douban-movie')" :class="['cat-btn', { active: currentSource === 'douban-movie' }]">豆瓣电影</button>
+            <button @click="selectSource('douban-group')" :class="['cat-btn', { active: currentSource === 'douban-group' }]">豆瓣小组</button>
+            <button @click="selectSource('hupu')" :class="['cat-btn', { active: currentSource === 'hupu' }]">虎扑</button>
+          </div>
+        </div>
+
+        <!-- 游戏 -->
+        <div class="cat-group">
+          <div class="cat-title">游戏</div>
+          <div class="cat-list">
+            <button @click="selectSource('ngabbs')" :class="['cat-btn', { active: currentSource === 'ngabbs' }]">NGA</button>
+            <button @click="selectSource('yystv')" :class="['cat-btn', { active: currentSource === 'yystv' }]">游研社</button>
+            <button @click="selectSource('genshin')" :class="['cat-btn', { active: currentSource === 'genshin' }]">原神</button>
+            <button @click="selectSource('starrail')" :class="['cat-btn', { active: currentSource === 'starrail' }]">星铁</button>
+          </div>
+        </div>
+
+        <!-- 社区 -->
+        <div class="cat-group">
+          <div class="cat-title">社区</div>
+          <div class="cat-list">
+            <button @click="selectSource('tieba')" :class="['cat-btn', { active: currentSource === 'tieba' }]">贴吧</button>
+            <button @click="selectSource('coolapk')" :class="['cat-btn', { active: currentSource === 'coolapk' }]">酷安</button>
+            <button @click="selectSource('jianshu')" :class="['cat-btn', { active: currentSource === 'jianshu' }]">简书</button>
+            <button @click="selectSource('linuxdo')" :class="['cat-btn', { active: currentSource === 'linuxdo' }]">Linux.do</button>
+          </div>
+        </div>
+
+        <!-- 其他 -->
+        <div class="cat-group">
+          <div class="cat-title">其他</div>
+          <div class="cat-list">
+            <button @click="selectSource('zhihu-daily')" :class="['cat-btn', { active: currentSource === 'zhihu-daily' }]">知乎日报</button>
+            <button @click="selectSource('weread')" :class="['cat-btn', { active: currentSource === 'weread' }]">微信读书</button>
+            <button @click="selectSource('guokr')" :class="['cat-btn', { active: currentSource === 'guokr' }]">果壳</button>
+            <button @click="selectSource('history')" :class="['cat-btn', { active: currentSource === 'history' }]">历史上的今天</button>
+          </div>
         </div>
       </div>
     </nav>
@@ -40,12 +111,12 @@
           <p>{{ currentData.description }}</p>
         </div>
         <div class="info-right">
-          <span class="update-time">更新于 {{ formatTime(currentData.updateTime) }}</span>
+          <span class="update-time">{{ formatTime(currentData.updateTime) }}</span>
         </div>
       </div>
     </div>
 
-    <!-- 热榜列表 -->
+    <!-- 列表 -->
     <main class="main">
       <div class="container">
         <div class="list">
@@ -88,17 +159,6 @@
 import { ref, onMounted } from 'vue'
 
 const API_BASE = '/api/hot'
-
-const categories = ref([
-  { id: 'weibo', name: '微博' },
-  { id: 'zhihu', name: '知乎' },
-  { id: 'bilibili', name: 'B站' },
-  { id: 'douyin', name: '抖音' },
-  { id: 'baidu', name: '百度' },
-  { id: 'toutiao', name: '头条' },
-  { id: 'weixin', name: '微信' },
-  { id: 'zhihu-daily', name: '知乎日报' },
-])
 
 const currentSource = ref('weibo')
 const currentData = ref(null)
@@ -189,28 +249,42 @@ onMounted(() => {
   color: #1a1a1a;
 }
 
-/* 分类 */
+/* 分类组 */
 .categories {
   background: #fff;
   border-bottom: 1px solid #eee;
+  padding: 16px 0;
 }
 
-.cat-scroll {
+.cat-group {
+  margin-bottom: 12px;
+}
+
+.cat-group:last-child {
+  margin-bottom: 0;
+}
+
+.cat-title {
+  font-size: 12px;
+  color: #999;
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.cat-list {
   display: flex;
-  gap: 4px;
-  overflow-x: auto;
-  padding: 12px 0;
+  flex-wrap: wrap;
+  gap: 6px;
 }
 
 .cat-btn {
-  padding: 8px 16px;
+  padding: 6px 14px;
   background: #f5f5f5;
   border: none;
-  border-radius: 20px;
+  border-radius: 16px;
   font-size: 13px;
   color: #666;
   cursor: pointer;
-  white-space: nowrap;
 }
 
 .cat-btn:hover {
@@ -225,7 +299,7 @@ onMounted(() => {
 /* 数据源信息 */
 .source-info {
   background: #fff;
-  padding: 24px 0;
+  padding: 20px 0;
   border-bottom: 1px solid #eee;
 }
 
@@ -236,8 +310,8 @@ onMounted(() => {
 }
 
 .info-left h1 {
-  font-size: 20px;
-  margin: 0 0 6px;
+  font-size: 18px;
+  margin: 0 0 4px;
 }
 
 .info-left p {
@@ -265,7 +339,7 @@ onMounted(() => {
 .list-item {
   display: flex;
   align-items: flex-start;
-  padding: 16px;
+  padding: 14px 16px;
   border-bottom: 1px solid #f5f5f5;
   text-decoration: none;
   color: inherit;
@@ -328,7 +402,7 @@ onMounted(() => {
 }
 
 .item-title {
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 500;
   color: #1a1a1a;
   margin: 0 0 4px;
@@ -336,7 +410,7 @@ onMounted(() => {
 }
 
 .item-desc {
-  font-size: 13px;
+  font-size: 12px;
   color: #666;
   margin: 0;
   line-height: 1.4;
