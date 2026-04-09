@@ -1,47 +1,9 @@
 <template>
-  <div class="app" :class="{ dark: isDark }">
-    <nav class="nav">
-      <div class="nav-container">
-        <a href="/tgmeng" class="nav-link">热榜</a>
-        <a href="/agents" class="nav-link">智能体</a>
-        <button @click="toggleDark" class="dark-btn">
-          {{ isDark ? '☀️' : '🌙' }}
-        </button>
-      </div>
-    </nav>
-    <router-view />
-  </div>
+  <router-view />
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from 'vue'
 import { RouterView } from 'vue-router'
-
-const isDark = ref(false)
-
-onMounted(() => {
-  const saved = localStorage.getItem('darkMode')
-  if (saved) {
-    isDark.value = saved === 'true'
-  } else {
-    isDark.value = window.matchMedia('(prefers-color-scheme: dark)').matches
-  }
-  updateTheme()
-})
-
-watch(isDark, () => {
-  updateTheme()
-})
-
-const updateTheme = () => {
-  localStorage.setItem('darkMode', isDark.value)
-  // 更新 html 根元素的 class
-  document.documentElement.classList.toggle('dark', isDark.value)
-}
-
-const toggleDark = () => {
-  isDark.value = !isDark.value
-}
 </script>
 
 <style>
@@ -81,47 +43,26 @@ html, body {
   background: var(--bg);
 }
 
-/* 导航 */
-.nav {
-  background: var(--bg-card);
-  border-bottom: 1px solid var(--border);
-  position: sticky;
-  top: 0;
-  z-index: 1000;
-}
-
-.nav-container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 16px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  height: 48px;
-}
-
-.nav-link {
-  color: var(--text);
-  text-decoration: none;
-  margin-right: 24px;
-  font-size: 14px;
-}
-
-.nav-link:hover {
-  color: var(--primary);
-}
-
-.dark-btn {
-  background: var(--bg-card);
+/* 暗黑模式切换按钮 */
+.dark-toggle {
+  background: transparent;
   border: 1px solid var(--border);
   border-radius: 8px;
-  padding: 4px 12px;
-  font-size: 16px;
+  padding: 6px 10px;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   color: var(--text);
+  transition: background 0.2s;
 }
 
-.dark-btn:hover {
+.dark-toggle:hover {
   background: var(--border);
+}
+
+.dark-toggle svg {
+  width: 18px;
+  height: 18px;
 }
 </style>
