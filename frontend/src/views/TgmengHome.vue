@@ -16,11 +16,27 @@
       </div>
     </header>
 
+    <!-- 分类 -->
+    <nav class="category-nav">
+      <div class="container">
+        <div class="cat-list">
+          <button 
+            v-for="cat in categories" 
+            :key="cat.id"
+            @click="selectCategory(cat.id)"
+            :class="['cat-btn', { active: currentCategory === cat.id }]"
+          >
+            {{ cat.name }}
+          </button>
+        </div>
+      </div>
+    </nav>
+
     <!-- 热榜网格 -->
     <main class="main">
       <div class="container">
         <div class="hot-grid">
-          <div v-for="source in displaySources" :key="source.id" class="hot-card">
+          <div v-for="source in currentSources" :key="source.id" class="hot-card">
             <div class="card-header">
               <h2 class="card-title">{{ source.name }}</h2>
               <a :href="source.link" target="_blank" class="card-link">更多 →</a>
@@ -55,36 +71,72 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 
 const API_BASE = '/api/hot'
 
-// 要显示的数据源
-const displaySources = ref([
-  { id: 'weibo', name: '微博', link: 'https://s.weibo.com/top/summary/', items: [] },
-  { id: 'zhihu', name: '知乎', link: 'https://www.zhihu.com/hot', items: [] },
-  { id: 'douyin', name: '抖音', link: 'https://www.douyin.com/hot', items: [] },
-  { id: 'bilibili', name: 'B站', link: 'https://www.bilibili.com/v/popular/rank/all', items: [] },
-  { id: 'toutiao', name: '头条', link: 'https://www.toutiao.com/', items: [] },
-  { id: 'baidu', name: '百度', link: 'https://top.baidu.com/board', items: [] },
-  { id: 'kuaishou', name: '快手', link: 'https://www.kuaishou.com/hot', items: [] },
-  { id: 'tieba', name: '贴吧', link: 'https://tieba.baidu.com/hottopic', items: [] },
+// 分类
+const categories = ref([
+  { id: 'all', name: '全部' },
+  { id: 'tech', name: '科技' },
+  { id: 'finance', name: '财经' },
+  { id: 'entertainment', name: '娱乐' },
+  { id: 'game', name: '游戏' },
+  { id: 'community', name: '社区' },
 ])
 
+// 所有数据源
+const allSources = [
+  { id: 'weibo', name: '微博', link: 'https://s.weibo.com/top/summary/', category: 'all', items: [] },
+  { id: 'zhihu', name: '知乎', link: 'https://www.zhihu.com/hot', category: 'all', items: [] },
+  { id: 'douyin', name: '抖音', link: 'https://www.douyin.com/hot', category: 'all', items: [] },
+  { id: 'bilibili', name: 'B站', link: 'https://www.bilibili.com/v/popular/rank/all', category: 'all', items: [] },
+  { id: 'toutiao', name: '头条', link: 'https://www.toutiao.com/', category: 'all', items: [] },
+  { id: 'baidu', name: '百度', link: 'https://top.baidu.com/board', category: 'all', items: [] },
+  { id: 'kuaishou', name: '快手', link: 'https://www.kuaishou.com/hot', category: 'all', items: [] },
+  { id: 'tieba', name: '贴吧', link: 'https://tieba.baidu.com/hottopic', category: 'all', items: [] },
+  { id: '36kr', name: '36氪', link: 'https://36kr.com/hot', category: 'tech', items: [] },
+  { id: 'ithome', name: 'IT之家', link: 'https://www.ithome.com/', category: 'tech', items: [] },
+  { id: 'csdn', name: 'CSDN', link: 'https://www.csdn.net/', category: 'tech', items: [] },
+  { id: 'juejin', name: '掘金', link: 'https://juejin.cn/', category: 'tech', items: [] },
+  { id: 'v2ex', name: 'V2EX', link: 'https://www.v2ex.com/', category: 'tech', items: [] },
+  { id: 'github', name: 'GitHub', link: 'https://github.com/trending', category: 'tech', items: [] },
+  { id: 'sina', name: '新浪', link: 'https://news.sina.com.cn/', category: 'finance', items: [] },
+  { id: 'thepaper', name: '澎湃', link: 'https://www.thepaper.cn/', category: 'finance', items: [] },
+  { id: 'douban-movie', name: '豆瓣电影', link: 'https://movie.douban.com/', category: 'entertainment', items: [] },
+  { id: 'douban-group', name: '豆瓣小组', link: 'https://www.douban.com/group/', category: 'entertainment', items: [] },
+  { id: 'hupu', name: '虎扑', link: 'https://www.hupu.com/', category: 'entertainment', items: [] },
+  { id: 'ngabbs', name: 'NGA', link: 'https://ngabbs.com/', category: 'game', items: [] },
+  { id: 'coolapk', name: '酷安', link: 'https://www.coolapk.com/', category: 'community', items: [] },
+  { id: 'jianshu', name: '简书', link: 'https://www.jianshu.com/', category: 'community', items: [] },
+  { id: 'guokr', name: '果壳', link: 'https://www.guokr.com/', category: 'community', items: [] },
+]
+
+const sources = ref(allSources)
+const currentCategory = ref('all')
 const updateTime = ref('')
+
+// 当前分类的数据源
+const currentSources = computed(() => {
+  return sources.value.filter(s => s.category === currentCategory.value || currentCategory.value === 'all')
+})
+
+const selectCategory = (catId) => {
+  currentCategory.value = catId
+}
 
 const loadAllData = async () => {
   const time = new Date()
   updateTime.value = time.getHours() + ':' + String(time.getMinutes()).padStart(2, '0')
   
-  // 并行加载所有数据源
+  // 并行加载所有数据
   await Promise.all(
-    displaySources.value.map(async (source) => {
+    sources.value.map(async (source) => {
       try {
         const res = await fetch(`${API_BASE}/${source.id}`)
         const json = await res.json()
         if (json.code === 200 && json.data) {
-          source.items = json.data.slice(0, 5) // 每个平台只显示前5条
+          source.items = json.data.slice(0, 5)
         }
       } catch (e) {
         console.error(`加载 ${source.name} 失败:`, e)
@@ -141,6 +193,43 @@ onMounted(() => {
 .update-time {
   font-size: 12px;
   color: #999;
+}
+
+/* 分类导航 */
+.category-nav {
+  background: #fff;
+  border-bottom: 1px solid #eee;
+  position: sticky;
+  top: 52px;
+  z-index: 99;
+}
+
+.cat-list {
+  display: flex;
+  gap: 4px;
+  padding: 10px 0;
+  overflow-x: auto;
+}
+
+.cat-btn {
+  padding: 8px 20px;
+  background: #f5f5f5;
+  border: none;
+  border-radius: 20px;
+  font-size: 13px;
+  color: #666;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.cat-btn:hover {
+  background: #eee;
+}
+
+.cat-btn.active {
+  background: #1a1a1a;
+  color: #fff;
 }
 
 /* 热榜网格 */
