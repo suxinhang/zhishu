@@ -109,7 +109,7 @@ onMounted(loadAgent)
 <style scoped>
 .chat-page {
   min-height: 100vh;
-  background: #f5f5f5;
+  background: var(--bg);
   display: flex;
   flex-direction: column;
 }
@@ -123,8 +123,8 @@ onMounted(loadAgent)
 
 /* 头部 */
 .header {
-  background: #fff;
-  border-bottom: 1px solid #eee;
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--border);
   position: sticky;
   top: 0;
   z-index: 100;
@@ -138,7 +138,7 @@ onMounted(loadAgent)
 }
 
 .back-link {
-  color: #666;
+  color: var(--text-muted);
   text-decoration: none;
   font-size: 14px;
 }
@@ -156,6 +156,7 @@ onMounted(loadAgent)
 .agent-name {
   font-size: 15px;
   font-weight: 500;
+  color: var(--text);
 }
 
 /* 消息 */
@@ -188,26 +189,26 @@ onMounted(loadAgent)
 }
 
 .message.user .message-content {
-  background: #1a1a1a;
+  background: var(--primary);
   color: #fff;
   border-bottom-right-radius: 4px;
 }
 
 .message.agent .message-content {
-  background: #fff;
-  color: #1a1a1a;
+  background: var(--bg-card);
+  color: var(--text);
   border-bottom-left-radius: 4px;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+  border: 1px solid var(--border);
 }
 
 .message-content.loading {
-  color: #999;
+  color: var(--text-muted);
 }
 
 /* 输入框 */
 .footer {
-  background: #fff;
-  border-top: 1px solid #eee;
+  background: var(--bg-card);
+  border-top: 1px solid var(--border);
   padding: 12px 0;
 }
 
@@ -220,20 +221,22 @@ onMounted(loadAgent)
 textarea {
   flex: 1;
   padding: 12px 16px;
-  border: 1px solid #ddd;
+  border: 1px solid var(--border);
   border-radius: 20px;
   font-size: 14px;
   resize: none;
   outline: none;
+  background: var(--bg);
+  color: var(--text);
 }
 
 textarea:focus {
-  border-color: #1a1a1a;
+  border-color: var(--primary);
 }
 
 button {
   padding: 12px 24px;
-  background: #1a1a1a;
+  background: var(--primary);
   color: #fff;
   border: none;
   border-radius: 20px;
@@ -242,7 +245,7 @@ button {
 }
 
 button:disabled {
-  background: #ccc;
+  opacity: 0.5;
   cursor: not-allowed;
 }
 </style>

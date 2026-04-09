@@ -154,7 +154,7 @@ onMounted(() => {
 /* 基础 */
 .hot-page {
   min-height: 100vh;
-  background: #f5f5f5;
+  background: var(--bg);
 }
 
 .container {
@@ -165,8 +165,8 @@ onMounted(() => {
 
 /* 头部 */
 .header {
-  background: #fff;
-  border-bottom: 1px solid #eee;
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--border);
   position: sticky;
   top: 0;
   z-index: 100;
@@ -184,21 +184,21 @@ onMounted(() => {
   align-items: center;
   gap: 8px;
   text-decoration: none;
-  color: #1a1a1a;
+  color: var(--text);
 }
 
-.logo-mark { color: #4F46E5; }
+.logo-mark { color: var(--primary); }
 .logo-text { font-size: 15px; font-weight: 600; }
 
 .update-time {
   font-size: 12px;
-  color: #999;
+  color: var(--text-muted);
 }
 
 /* 分类导航 */
 .category-nav {
-  background: #fff;
-  border-bottom: 1px solid #eee;
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--border);
   position: sticky;
   top: 52px;
   z-index: 99;
@@ -213,23 +213,23 @@ onMounted(() => {
 
 .cat-btn {
   padding: 8px 20px;
-  background: #f5f5f5;
+  background: var(--bg);
   border: none;
   border-radius: 20px;
   font-size: 13px;
-  color: #666;
+  color: var(--text-muted);
   cursor: pointer;
   white-space: nowrap;
   flex-shrink: 0;
 }
 
 .cat-btn:hover {
-  background: #eee;
+  background: var(--border);
 }
 
 .cat-btn.active {
-  background: #1a1a1a;
-  color: #fff;
+  background: var(--text);
+  color: var(--bg);
 }
 
 /* 热榜网格 */
@@ -245,9 +245,10 @@ onMounted(() => {
 
 /* 卡片 */
 .hot-card {
-  background: #fff;
+  background: var(--bg-card);
   border-radius: 8px;
   overflow: hidden;
+  border: 1px solid var(--border-light);
 }
 
 .card-header {
@@ -255,23 +256,24 @@ onMounted(() => {
   justify-content: space-between;
   align-items: center;
   padding: 14px 16px;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid var(--border-light);
 }
 
 .card-title {
   font-size: 14px;
   font-weight: 600;
   margin: 0;
+  color: var(--text);
 }
 
 .card-link {
   font-size: 12px;
-  color: #999;
+  color: var(--text-muted);
   text-decoration: none;
 }
 
 .card-link:hover {
-  color: #4F46E5;
+  color: var(--primary);
 }
 
 /* 列表 */
@@ -284,15 +286,15 @@ onMounted(() => {
   align-items: flex-start;
   padding: 10px 16px;
   text-decoration: none;
-  color: #1a1a1a;
+  color: var(--text);
 }
 
 .list-item:hover {
-  background: #fafafa;
+  background: var(--bg);
 }
 
 .list-item:hover .item-title {
-  color: #4F46E5;
+  color: var(--primary);
 }
 
 .item-rank {
@@ -303,7 +305,7 @@ onMounted(() => {
   justify-content: center;
   font-size: 11px;
   font-weight: 600;
-  color: #999;
+  color: var(--text-muted);
   flex-shrink: 0;
 }
 
@@ -325,7 +327,7 @@ onMounted(() => {
 .loading {
   padding: 20px;
   text-align: center;
-  color: #999;
+  color: var(--text-muted);
   font-size: 13px;
 }
 
@@ -333,7 +335,7 @@ onMounted(() => {
 .footer {
   padding: 32px 0;
   text-align: center;
-  color: #999;
+  color: var(--text-muted);
   font-size: 13px;
 }
 
