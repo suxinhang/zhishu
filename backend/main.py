@@ -24,8 +24,8 @@ engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
-# DeepSeek 配置
-DEEPSEEK_API_KEY = os.getenv("DEEPSEEK_API_KEY", "sk-f92d66b08c124a3fa14bc8604c910493")
+# DeepSeek 配置 - V3.2 模型
+DEEPSEEK_API_KEY = os.getenv("DEEPSEEK_API_KEY", "sk-dac9fe3ee5414ff5bd8bcbecd4456617")
 DEEPSEEK_BASE_URL = os.getenv("DEEPSEEK_BASE_URL", "https://api.deepseek.com/v1")
 
 # 数据模型
@@ -203,12 +203,15 @@ async def chat(req: ChatRequest):
         db.close()
         return {"error": "Agent not found"}
     
+    # 在 session 关闭前获取数据
+    system_prompt = agent.system_prompt or "你是一个智能助手"
+    
     agent.chat_count += 1
     db.commit()
     db.close()
     
     # 调用 DeepSeek API
-    response = await chat_with_deepseek(agent.system_prompt, req.message)
+    response = await chat_with_deepseek(system_prompt, req.message)
     
     return {"response": response}
 
