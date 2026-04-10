@@ -1,5 +1,10 @@
 <template>
   <div class="chat-page">
+    <!-- 科技感背景 -->
+    <div class="tech-bg">
+      <div class="matrix-rain"></div>
+    </div>
+    
     <!-- 头部 -->
     <header class="header">
       <div class="container">
@@ -29,11 +34,33 @@
             :key="idx"
             :class="['message', msg.role]"
           >
-            <div class="message-content">{{ msg.content }}</div>
+            <div class="message-content">
+              <!-- 用户消息：纯文本 -->
+              <template v-if="msg.role === 'user'">
+                {{ msg.content }}
+              </template>
+              <!-- AI消息：Markdown渲染 -->
+              <template v-else>
+                <div class="markdown-body" v-html="renderMarkdown(msg.content)"></div>
+              </template>
+            </div>
           </div>
           
-          <div v-if="loading" class="message agent">
-            <div class="message-content loading">正在思考...</div>
+          <!-- 打字机效果 -->
+          <div v-if="typingText" class="message agent">
+            <div class="message-content">
+              <div class="markdown-body" v-html="renderMarkdown(typingText)"></div>
+              <span class="typing-cursor">▌</span>
+            </div>
+          </div>
+          
+          <div v-if="loading && !typingText" class="message agent">
+            <div class="message-content loading">
+              <span class="loading-dots">
+                <span></span><span></span><span></span>
+              </span>
+              正在思考...
+            </div>
           </div>
         </div>
       </div>
@@ -42,14 +69,23 @@
     <!-- 输入框 -->
     <footer class="footer">
       <div class="container">
+        <div class="input-options">
+          <button 
+            @click="toggleEnterMode" 
+            class="enter-mode-btn"
+            :title="enterToSend ? '当前: Enter发送' : '当前: Enter换行'"
+          >
+            {{ enterToSend ? '↵ 发送' : '↵ 换行' }}
+          </button>
+        </div>
         <div class="input-area">
           <textarea 
             v-model="inputText"
-            placeholder="输入消息..."
-            @keydown.enter.ctrl="sendMessage"
+            :placeholder="enterToSend ? '输入消息... (Enter发送, Shift+Enter换行)' : '输入消息... (Enter换行, Ctrl+Enter发送)'"
+            @keydown.enter.exact="handleEnter"
             rows="2"
           />
-          <button @click="sendMessage" :disabled="loading || !inputText.trim()">
+          <button @click="sendMessage()" :disabled="loading || !inputText.trim()">
             发送
           </button>
         </div>
@@ -61,24 +97,30 @@
 <script setup>
 import { ref, onMounted, watch, nextTick } from 'vue'
 import { useRoute } from 'vue-router'
+import { marked } from 'marked'
+
+// 配置 marked
+marked.setOptions({
+  breaks: true,
+  gfm: true
+})
 
 const route = useRoute()
 
 // 暗黑模式
 const isDark = ref(false)
 
-onMounted(() => {
-  const saved = localStorage.getItem('darkMode')
-  if (saved) {
-    isDark.value = saved === 'true'
-  } else {
-    isDark.value = window.matchMedia('(prefers-color-scheme: dark)').matches
-  }
-  updateTheme()
-  loadAgent()
-})
+// Enter键模式
+const enterToSend = ref(true)
 
-watch(isDark, updateTheme)
+// 打字机效果
+const typingText = ref('')
+const typingTimer = ref(null)
+
+// Markdown渲染
+const renderMarkdown = (text) => {
+  return marked.parse(text || '')
+}
 
 const updateTheme = () => {
   localStorage.setItem('darkMode', isDark.value)
@@ -88,6 +130,70 @@ const updateTheme = () => {
 const toggleDark = () => {
   isDark.value = !isDark.value
 }
+
+const toggleEnterMode = () => {
+  enterToSend.value = !enterToSend.value
+  localStorage.setItem('enterToSend', enterToSend.value)
+}
+
+const handleEnter = (e) => {
+  if (enterToSend.value) {
+    if (!e.shiftKey) {
+      e.preventDefault()
+      sendMessage()
+    }
+  } else {
+    if (e.ctrlKey) {
+      e.preventDefault()
+      sendMessage()
+    }
+  }
+}
+
+// 打字机效果函数
+const typeWriter = (text, speed = 30) => {
+  typingText.value = ''
+  let index = 0
+  
+  // 清除之前的定时器
+  if (typingTimer.value) {
+    clearInterval(typingTimer.value)
+  }
+  
+  typingTimer.value = setInterval(() => {
+    if (index < text.length) {
+      typingText.value += text.charAt(index)
+      index++
+      scrollToBottom()
+    } else {
+      clearInterval(typingTimer.value)
+      typingTimer.value = null
+      // 完成后添加到消息列表
+      messages.value.push({ role: 'agent', content: text })
+      typingText.value = ''
+      loading.value = false
+    }
+  }, speed)
+}
+
+onMounted(() => {
+  const saved = localStorage.getItem('darkMode')
+  if (saved) {
+    isDark.value = saved === 'true'
+  } else {
+    isDark.value = window.matchMedia('(prefers-color-scheme: dark)').matches
+  }
+  updateTheme()
+  
+  const savedEnterMode = localStorage.getItem('enterToSend')
+  if (savedEnterMode !== null) {
+    enterToSend.value = savedEnterMode === 'true'
+  }
+  
+  loadAgent()
+})
+
+watch(isDark, updateTheme)
 
 const agent = ref(null)
 const messages = ref([])
@@ -122,12 +228,13 @@ const sendMessage = async () => {
     })
     
     const data = await res.json()
-    messages.value.push({ role: 'agent', content: data.response })
+    // 使用打字机效果展示回复
+    typeWriter(data.response, 25)
   } catch (e) {
     messages.value.push({ role: 'agent', content: '抱歉，发生错误，请稍后再试。' })
+    loading.value = false
   }
   
-  loading.value = false
   await nextTick()
   scrollToBottom()
 }
@@ -137,16 +244,41 @@ const scrollToBottom = () => {
     messagesRef.value.scrollTop = messagesRef.value.scrollHeight
   }
 }
-
-onMounted(loadAgent)
 </script>
 
 <style scoped>
+/* 科技感背景 */
+.tech-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.matrix-rain {
+  position: absolute;
+  inset: 0;
+  background: 
+    radial-gradient(ellipse at top, rgba(79, 70, 229, 0.1) 0%, transparent 50%),
+    radial-gradient(ellipse at bottom, rgba(79, 70, 229, 0.05) 0%, transparent 70%);
+  animation: matrix-shift 15s ease-in-out infinite alternate;
+}
+
+@keyframes matrix-shift {
+  0% { opacity: 0.5; }
+  100% { opacity: 1; }
+}
+
 .chat-page {
   min-height: 100vh;
   background: var(--bg);
   display: flex;
   flex-direction: column;
+  position: relative;
 }
 
 .container {
@@ -220,24 +352,113 @@ onMounted(loadAgent)
   padding: 12px 16px;
   border-radius: 16px;
   font-size: 14px;
-  line-height: 1.5;
+  line-height: 1.6;
 }
 
 .message.user .message-content {
-  background: var(--primary);
+  background: linear-gradient(135deg, var(--primary) 0%, #6366f1 100%);
   color: #fff;
   border-bottom-right-radius: 4px;
+  box-shadow: 0 2px 10px rgba(79, 70, 229, 0.3);
 }
 
 .message.agent .message-content {
-  background: var(--bg-card);
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
   color: var(--text);
   border-bottom-left-radius: 4px;
-  border: 1px solid var(--border);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .message-content.loading {
   color: var(--text-muted);
+}
+
+/* 加载动画 */
+.loading-dots {
+  display: inline-flex;
+  gap: 4px;
+  margin-right: 8px;
+}
+
+.loading-dots span {
+  width: 6px;
+  height: 6px;
+  background: var(--primary);
+  border-radius: 50%;
+  animation: bounce 1.4s ease-in-out infinite;
+}
+
+.loading-dots span:nth-child(1) { animation-delay: 0s; }
+.loading-dots span:nth-child(2) { animation-delay: 0.2s; }
+.loading-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes bounce {
+  0%, 80%, 100% { transform: translateY(0); }
+  40% { transform: translateY(-6px); }
+}
+
+/* 打字机光标 */
+.typing-cursor {
+  color: var(--primary);
+  animation: blink 1s step-end infinite;
+  margin-left: 2px;
+}
+
+@keyframes blink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+
+/* Markdown样式 */
+.markdown-body {
+  line-height: 1.6;
+}
+
+.markdown-body p {
+  margin: 0 0 8px;
+}
+
+.markdown-body p:last-child {
+  margin-bottom: 0;
+}
+
+.markdown-body code {
+  background: rgba(0, 0, 0, 0.1);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 13px;
+}
+
+.markdown-body pre {
+  background: rgba(0, 0, 0, 0.1);
+  padding: 12px;
+  border-radius: 8px;
+  overflow-x: auto;
+  margin: 8px 0;
+}
+
+.markdown-body pre code {
+  background: none;
+  padding: 0;
+}
+
+.markdown-body ul, .markdown-body ol {
+  padding-left: 20px;
+  margin: 8px 0;
+}
+
+.markdown-body li {
+  margin: 4px 0;
+}
+
+.markdown-body strong {
+  font-weight: 600;
+}
+
+.markdown-body a {
+  color: var(--primary);
+  text-decoration: none;
 }
 
 /* 输入框 */
@@ -245,6 +466,28 @@ onMounted(loadAgent)
   background: var(--bg-card);
   border-top: 1px solid var(--border);
   padding: 12px 0;
+}
+
+.input-options {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 8px;
+}
+
+.enter-mode-btn {
+  font-size: 12px;
+  padding: 4px 10px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.enter-mode-btn:hover {
+  border-color: var(--primary);
+  color: var(--primary);
 }
 
 .input-area {
@@ -277,6 +520,11 @@ button {
   border-radius: 20px;
   font-size: 14px;
   cursor: pointer;
+  transition: all 0.2s;
+}
+
+button:hover:not(:disabled) {
+  background: #6366f1;
 }
 
 button:disabled {
