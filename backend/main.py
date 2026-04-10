@@ -57,6 +57,7 @@ Base.metadata.create_all(bind=engine)
 def init_data():
     db = SessionLocal()
     
+    # 初始化分类
     if db.query(Category).count() == 0:
         categories = [
             Category(id=1, name="写作", icon="✍️", sort=1),
@@ -66,6 +67,10 @@ def init_data():
             Category(id=5, name="效率", icon="⚡", sort=5),
         ]
         db.add_all(categories)
+        db.commit()
+    
+    # 初始化智能体
+    if db.query(Agent).count() == 0:
         
         agents = [
             # 写作类 (5个)
