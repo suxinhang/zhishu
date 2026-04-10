@@ -24,8 +24,8 @@
             <span class="logo-text">知枢</span>
           </a>
           <div class="nav-links">
-            <a href="#products">产品</a>
-            <a href="#features">特性</a>
+            <a href="/agents">匠人</a>
+            <a href="/tgmeng">看点</a>
           </div>
           <div class="nav-actions">
             <button @click="toggleDark" class="dark-toggle" :title="isDark ? '切换亮色模式' : '切换暗黑模式'">
@@ -37,8 +37,8 @@
                 <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>
               </svg>
             </button>
-            <a href="/agents" class="btn-text">智能体</a>
-            <a href="/tgmeng" class="btn-primary">热榜</a>
+            <a href="/agents" class="btn-primary">匠人 🛠️</a>
+            <a href="/tgmeng" class="btn-primary" style="background: linear-gradient(135deg, #F59E0B 0%, #EF4444 100%);">看点 🔥</a>
           </div>
         </div>
       </div>
@@ -132,7 +132,7 @@
               </svg>
             </div>
             <h3>知枢·匠人 🛠️</h3>
-            <p>发现、对话各领域知识达人</p>
+            <p>专业匠人，对话各领域专家</p>
             <div class="card-arrow">
               <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
                 <path d="M7 5L12 10L7 15" stroke="currentColor" stroke-width="1.5"/>
