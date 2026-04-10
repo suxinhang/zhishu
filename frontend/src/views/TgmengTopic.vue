@@ -4,8 +4,8 @@
       <div class="tgmeng-container">
         <div class="tgmeng-header-inner">
           <router-link to="/tgmeng" class="tgmeng-logo">
-            <span class="tgmeng-logo-icon">🍭</span>
-            <span class="logo-text">知枢热榜</span>
+            <span class="tgmeng-logo-icon">🔥</span>
+            <span class="logo-text">知枢·看点</span>
           </router-link>
           <div class="tgmeng-back">
             <router-link to="/tgmeng">← 返回首页</router-link>

@@ -4,9 +4,9 @@
     <div class="text-center mb-12 animate-fade-in">
       <div class="flex items-center justify-center gap-2 mb-4">
         <span class="text-3xl">🏷️</span>
-        <h1 class="text-3xl font-bold gradient-text">智能体分类</h1>
+        <h1 class="text-3xl font-bold gradient-text">识客分类</h1>
       </div>
-      <p class="text-slate-500">按场景选择最适合你的智能体</p>
+      <p class="text-slate-500">按场景选择最适合你的识客</p>
     </div>
     
     <!-- 分类网格 -->
@@ -28,7 +28,7 @@
           <h3 class="text-lg font-semibold text-slate-800">{{ cat.name }}</h3>
           <p class="text-sm text-slate-500 mt-2 flex items-center justify-center gap-1">
             <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
-            {{ getAgentCount(cat.id) }} 个智能体
+            {{ getAgentCount(cat.id) }} 位识客
           </p>
         </div>
         
@@ -67,7 +67,7 @@
         <div class="w-px h-12 bg-slate-200"></div>
         <div>
           <p class="text-3xl font-bold text-amber-500">{{ agents.length }}</p>
-          <p class="text-sm text-slate-500 mt-1">智能体总数</p>
+          <p class="text-sm text-slate-500 mt-1">识客总数</p>
         </div>
         <div class="w-px h-12 bg-slate-200"></div>
         <div>

@@ -1,5 +1,11 @@
 <template>
   <div class="agents-page">
+    <!-- 科技感背景 -->
+    <div class="tech-bg">
+      <div class="grid-lines"></div>
+      <div class="glow-orb"></div>
+    </div>
+    
     <!-- 头部 -->
     <header class="header">
       <div class="container">
@@ -14,7 +20,7 @@
             <span class="logo-text">知枢</span>
           </a>
           <div class="nav-tabs">
-            <span class="active">智能体</span>
+            <span class="active">识客</span>
             <a href="/tgmeng">热榜</a>
           </div>
           <button @click="toggleDark" class="dark-toggle" :title="isDark ? '切换亮色模式' : '切换暗黑模式'">
@@ -103,6 +109,16 @@ const router = useRouter()
 // 暗黑模式
 const isDark = ref(false)
 
+// 函数定义必须在使用前
+const updateTheme = () => {
+  localStorage.setItem('darkMode', isDark.value)
+  document.documentElement.classList.toggle('dark', isDark.value)
+}
+
+const toggleDark = () => {
+  isDark.value = !isDark.value
+}
+
 onMounted(() => {
   const saved = localStorage.getItem('darkMode')
   if (saved) {
@@ -114,15 +130,6 @@ onMounted(() => {
 })
 
 watch(isDark, updateTheme)
-
-const updateTheme = () => {
-  localStorage.setItem('darkMode', isDark.value)
-  document.documentElement.classList.toggle('dark', isDark.value)
-}
-
-const toggleDark = () => {
-  isDark.value = !isDark.value
-}
 
 const categories = ref([])
 const agents = ref([])
@@ -153,7 +160,7 @@ const doSearch = () => {
 }
 
 const goToChat = (agent) => {
-  router.push(`/agents/${agent.id}`)
+  router.push(`/chat/${agent.id}`)
 }
 
 const loadData = async () => {
@@ -169,9 +176,54 @@ onMounted(loadData)
 </script>
 
 <style scoped>
+/* 科技感背景 */
+.tech-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.grid-lines {
+  position: absolute;
+  inset: 0;
+  background-image: 
+    linear-gradient(rgba(79, 70, 229, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(79, 70, 229, 0.03) 1px, transparent 1px);
+  background-size: 60px 60px;
+  animation: grid-pulse 10s ease-in-out infinite;
+}
+
+@keyframes grid-pulse {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
+
+.glow-orb {
+  position: absolute;
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(79, 70, 229, 0.15) 0%, transparent 70%);
+  top: 50%;
+  right: -100px;
+  transform: translateY(-50%);
+  animation: orb-float 8s ease-in-out infinite;
+  filter: blur(40px);
+}
+
+@keyframes orb-float {
+  0%, 100% { transform: translateY(-50%) scale(1); }
+  50% { transform: translateY(-60%) scale(1.2); }
+}
+
 .agents-page {
   min-height: 100vh;
   background: var(--bg);
+  position: relative;
 }
 
 .container {
@@ -303,17 +355,39 @@ onMounted(loadData)
 }
 
 .agent-card {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
   padding: 20px;
   cursor: pointer;
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.agent-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--primary), transparent);
+  opacity: 0;
+  transition: opacity 0.3s;
 }
 
 .agent-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  transform: translateY(-5px);
+  border-color: rgba(79, 70, 229, 0.3);
+  box-shadow: 
+    0 10px 30px rgba(79, 70, 229, 0.2),
+    0 0 20px rgba(79, 70, 229, 0.1);
+}
+
+.agent-card:hover::before {
+  opacity: 1;
 }
 
 .card-icon {
@@ -351,11 +425,46 @@ onMounted(loadData)
   .agents-grid {
     grid-template-columns: repeat(2, 1fr);
   }
+  
+  .nav-tabs {
+    gap: 16px;
+  }
+  
+  .nav-tabs span,
+  .nav-tabs a {
+    font-size: 13px;
+  }
 }
 
 @media (max-width: 480px) {
   .agents-grid {
     grid-template-columns: 1fr;
+  }
+  
+  .header .container {
+    padding: 0 12px;
+  }
+  
+  .nav {
+    gap: 8px;
+  }
+  
+  .nav-tabs {
+    gap: 12px;
+  }
+  
+  .nav-tabs span,
+  .nav-tabs a {
+    font-size: 12px;
+  }
+  
+  .dark-toggle {
+    padding: 4px 8px;
+  }
+  
+  .dark-toggle svg {
+    width: 16px;
+    height: 16px;
   }
 }
 </style>

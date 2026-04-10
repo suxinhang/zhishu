@@ -1,5 +1,14 @@
 <template>
   <div class="home">
+    <!-- 科技感背景 -->
+    <div class="tech-bg">
+      <div class="grid-lines"></div>
+      <div class="particles">
+        <div v-for="i in 20" :key="i" class="particle" :style="{ left: Math.random() * 100 + '%', animationDelay: Math.random() * 5 + 's' }"></div>
+      </div>
+      <div class="scan-line"></div>
+    </div>
+    
     <!-- 头部 -->
     <header class="header">
       <div class="container">
@@ -19,6 +28,15 @@
             <a href="#features">特性</a>
           </div>
           <div class="nav-actions">
+            <button @click="toggleDark" class="dark-toggle" :title="isDark ? '切换亮色模式' : '切换暗黑模式'">
+              <svg v-if="isDark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="5"/>
+                <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+              </svg>
+              <svg v-else viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>
+              </svg>
+            </button>
             <a href="/agents" class="btn-text">智能体</a>
             <a href="/tgmeng" class="btn-primary">热榜</a>
           </div>
@@ -35,7 +53,7 @@
             <span class="highlight">新可能</span>
           </h1>
           <p class="hero-desc">
-            知枢是一个智能体聚合平台，让你轻松发现和使用各类 AI 助手，同时实时追踪全网热点。
+            知枢是知识聚合平台，识客帮你对话各领域达人，看点帮你追踪全网热点。
           </p>
           <div class="hero-actions">
             <a href="/agents" class="btn-large btn-primary">
@@ -113,8 +131,8 @@
                 <path d="M14 34c0-4 4-7 10-7s10 3 10 7" stroke="#4F46E5" stroke-width="2" stroke-linecap="round"/>
               </svg>
             </div>
-            <h3>智能体平台</h3>
-            <p>发现、体验各类 AI 智能助手</p>
+            <h3>知枢·识客</h3>
+            <p>发现、对话各领域知识达人</p>
             <div class="card-arrow">
               <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
                 <path d="M7 5L12 10L7 15" stroke="currentColor" stroke-width="1.5"/>
@@ -129,7 +147,7 @@
                 <circle cx="24" cy="24" r="14" stroke="#D97706" stroke-width="2"/>
               </svg>
             </div>
-            <h3>知枢热榜</h3>
+            <h3>知枢·看点</h3>
             <p>实时聚合全网热点资讯</p>
             <div class="card-arrow">
               <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
@@ -212,12 +230,123 @@
   </div>
 </template>
 
+<script setup>
+import { ref, onMounted, watch } from 'vue'
+
+// 暗黑模式
+const isDark = ref(false)
+
+// 函数定义必须在使用前
+const updateTheme = () => {
+  localStorage.setItem('darkMode', isDark.value)
+  document.documentElement.classList.toggle('dark', isDark.value)
+}
+
+const toggleDark = () => {
+  isDark.value = !isDark.value
+}
+
+onMounted(() => {
+  const saved = localStorage.getItem('darkMode')
+  if (saved) {
+    isDark.value = saved === 'true'
+  } else {
+    isDark.value = window.matchMedia('(prefers-color-scheme: dark)').matches
+  }
+  updateTheme()
+})
+
+watch(isDark, updateTheme)
+</script>
+
 <style scoped>
+/* 科技感背景 */
+.tech-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.grid-lines {
+  position: absolute;
+  inset: 0;
+  background-image: 
+    linear-gradient(var(--primary) 1px, transparent 1px),
+    linear-gradient(90deg, var(--primary) 1px, transparent 1px);
+  background-size: 50px 50px;
+  opacity: 0.05;
+  animation: grid-move 20s linear infinite;
+}
+
+@keyframes grid-move {
+  0% { transform: translate(0, 0); }
+  100% { transform: translate(50px, 50px); }
+}
+
+.particles {
+  position: absolute;
+  inset: 0;
+}
+
+.particle {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: var(--primary);
+  border-radius: 50%;
+  opacity: 0.6;
+  animation: float-up 8s ease-in-out infinite;
+  box-shadow: 0 0 10px var(--primary), 0 0 20px var(--primary);
+}
+
+@keyframes float-up {
+  0%, 100% { 
+    transform: translateY(100vh) scale(0);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.8;
+  }
+  90% {
+    opacity: 0.8;
+  }
+  100% {
+    transform: translateY(-100px) scale(1);
+    opacity: 0;
+  }
+}
+
+.scan-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, 
+    transparent 0%,
+    var(--primary) 50%,
+    transparent 100%
+  );
+  opacity: 0.3;
+  animation: scan 4s linear infinite;
+  box-shadow: 0 0 15px var(--primary);
+}
+
+@keyframes scan {
+  0% { top: -2px; }
+  100% { top: 100%; }
+}
+
 /* 基础 */
 .home {
   min-height: 100vh;
-  background: #fafafa;
+  background: var(--bg);
   position: relative;
+  color: var(--text);
 }
 
 .home::before {
@@ -227,7 +356,7 @@
   left: 0;
   right: 0;
   height: 400px;
-  background: linear-gradient(180deg, #f0f4ff 0%, #fafafa 100%);
+  background: linear-gradient(180deg, var(--bg-card) 0%, var(--bg) 100%);
   z-index: 0;
 }
 
@@ -239,8 +368,8 @@
 
 /* 头部 */
 .header {
-  background: #fff;
-  border-bottom: 1px solid #eee;
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--border);
   position: sticky;
   top: 0;
   z-index: 100;
@@ -258,11 +387,11 @@
   align-items: center;
   gap: 10px;
   text-decoration: none;
-  color: #1a1a1a;
+  color: var(--text);
 }
 
 .logo-mark {
-  color: #4F46E5;
+  color: var(--primary);
 }
 
 .logo-text {
@@ -276,13 +405,13 @@
 }
 
 .nav-links a {
-  color: #666;
+  color: var(--text-muted);
   text-decoration: none;
   font-size: 14px;
 }
 
 .nav-links a:hover {
-  color: #1a1a1a;
+  color: var(--text);
 }
 
 .nav-actions {
@@ -291,27 +420,49 @@
   gap: 16px;
 }
 
+.dark-toggle {
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 6px 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  transition: background 0.2s;
+}
+
+.dark-toggle:hover {
+  background: var(--border);
+}
+
+.dark-toggle svg {
+  width: 18px;
+  height: 18px;
+}
+
 .btn-text {
-  color: #666;
+  color: var(--text-muted);
   text-decoration: none;
   font-size: 14px;
 }
 
 .btn-text:hover {
-  color: #1a1a1a;
+  color: var(--text);
 }
 
 .btn-primary {
   padding: 8px 20px;
-  background: #1a1a1a;
-  color: #fff;
+  background: var(--text);
+  color: var(--bg-card);
   border-radius: 6px;
   text-decoration: none;
   font-size: 14px;
 }
 
 .btn-primary:hover {
-  background: #333;
+  background: var(--primary);
 }
 
 /* Hero */
@@ -331,18 +482,37 @@
 .hero-title {
   font-size: 42px;
   font-weight: 600;
-  color: #1a1a1a;
+  color: var(--text);
   margin: 0 0 16px;
   line-height: 1.2;
+  position: relative;
+}
+
+.hero-title::after {
+  content: ''; 
+  position: absolute;
+  bottom: -8px;
+  left: 0;
+  width: 60px;
+  height: 4px;
+  background: linear-gradient(90deg, var(--primary), transparent);
+  border-radius: 2px;
 }
 
 .highlight {
-  color: #4F46E5;
+  color: var(--primary);
+  text-shadow: 0 0 20px rgba(79, 70, 229, 0.5);
+  animation: glow 2s ease-in-out infinite alternate;
+}
+
+@keyframes glow {
+  from { text-shadow: 0 0 20px rgba(79, 70, 229, 0.5); }
+  to { text-shadow: 0 0 30px rgba(79, 70, 229, 0.8), 0 0 40px rgba(79, 70, 229, 0.4); }
 }
 
 .hero-desc {
   font-size: 16px;
-  color: #666;
+  color: var(--text-muted);
   line-height: 1.6;
   margin: 0 0 28px;
 }
@@ -364,31 +534,80 @@
 }
 
 .btn-large.btn-primary {
-  background: #1a1a1a;
+  background: linear-gradient(135deg, var(--primary) 0%, #6366f1 100%);
   color: #fff;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(79, 70, 229, 0.4);
+}
+
+.btn-large.btn-primary::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+  transition: left 0.5s;
+}
+
+.btn-large.btn-primary:hover::before {
+  left: 100%;
+}
+
+.btn-large.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(79, 70, 229, 0.6);
 }
 
 .btn-large.btn-outline {
-  border: 1px solid #ddd;
-  color: #666;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
 }
 
 .btn-large.btn-outline:hover {
-  border-color: #1a1a1a;
-  color: #1a1a1a;
+  border-color: var(--text);
+  color: var(--text);
 }
 
 /* Visual Card */
 .visual-card {
-  background: #fff;
-  border-radius: 12px;
-  border: 1px solid #eee;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(20px);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
   overflow: hidden;
+  position: relative;
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.1),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+}
+
+.visual-card::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    45deg,
+    transparent 40%,
+    rgba(255, 255, 255, 0.1) 50%,
+    transparent 60%
+  );
+  animation: shine 3s linear infinite;
+}
+
+@keyframes shine {
+  0% { transform: translateX(-100%) translateY(-100%); }
+  100% { transform: translateX(100%) translateY(100%); }
 }
 
 .visual-header {
   padding: 16px 20px;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid var(--border);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -397,12 +616,12 @@
 .card-title {
   font-size: 14px;
   font-weight: 500;
-  color: #1a1a1a;
+  color: var(--text);
 }
 
 .view-all {
   font-size: 13px;
-  color: #4F46E5;
+  color: var(--primary);
   text-decoration: none;
 }
 
@@ -420,13 +639,13 @@
 }
 
 .visual-item:hover {
-  background: #f5f5f5;
+  background: var(--border);
 }
 
 .item-icon {
   width: 44px;
   height: 44px;
-  background: #f5f5f5;
+  background: var(--border);
   border-radius: 10px;
   display: flex;
   align-items: center;
@@ -436,13 +655,13 @@
 .item-name {
   font-size: 14px;
   font-weight: 500;
-  color: #1a1a1a;
+  color: var(--text);
   margin-bottom: 2px;
 }
 
 .item-desc {
   font-size: 12px;
-  color: #999;
+  color: var(--text-muted);
 }
 
 /* Products */
@@ -468,16 +687,50 @@
 .product-card {
   display: block;
   padding: 28px;
-  background: #fff;
-  border: 1px solid #eee;
-  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
   text-decoration: none;
   color: inherit;
-  transition: border-color 0.2s;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.product-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 16px;
+  padding: 1px;
+  background: linear-gradient(135deg, rgba(255,255,255,0.2), transparent, rgba(255,255,255,0.1));
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: xor;
+  -webkit-mask-composite: xor;
+  pointer-events: none;
 }
 
 .product-card:hover {
-  border-color: #ccc;
+  transform: translateY(-5px);
+  border-color: var(--primary);
+  box-shadow: 0 10px 40px rgba(79, 70, 229, 0.3), 0 0 20px rgba(79, 70, 229, 0.2);
+}
+
+.product-card:hover::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(79, 70, 229, 0.1), transparent);
+  animation: card-shine 0.5s ease;
+}
+
+@keyframes card-shine {
+  0% { left: -100%; }
+  100% { left: 100%; }
 }
 
 .product-icon {
@@ -491,19 +744,19 @@
 
 .product-card p {
   font-size: 14px;
-  color: #666;
+  color: var(--text-muted);
   margin: 0;
 }
 
 .card-arrow {
   margin-top: 16px;
-  color: #ccc;
+  color: var(--text-muted);
 }
 
 /* Features */
 .features {
   padding: 60px 0;
-  background: #fff;
+  background: var(--bg-card);
 }
 
 .features-grid {
@@ -534,15 +787,15 @@
 
 .feature p {
   font-size: 13px;
-  color: #666;
+  color: var(--text-muted);
   margin: 0;
 }
 
 /* Footer */
 .footer {
   padding: 40px 0;
-  border-top: 1px solid #eee;
-  background: #fff;
+  border-top: 1px solid var(--border);
+  background: var(--bg-card);
   position: relative;
   z-index: 1;
 }
@@ -562,18 +815,18 @@
 .footer-brand span {
   font-size: 15px;
   font-weight: 500;
-  color: #666;
+  color: var(--text-muted);
 }
 
 .footer-slogan {
   font-size: 13px;
-  color: #999;
+  color: var(--text-muted);
   margin: 0 0 8px;
 }
 
 .footer-copy {
   font-size: 12px;
-  color: #bbb;
+  color: var(--text-muted);
   margin: 0;
 }
 

@@ -10,7 +10,7 @@
             <circle cx="10" cy="20" r="2" fill="currentColor"/>
             <circle cx="22" cy="20" r="2" fill="currentColor"/>
           </svg>
-          <span class="logo-text">知枢热榜</span>
+          <span class="logo-text">知枢·看点</span>
         </a>
         <div class="header-right">
           <span class="update-time">{{ updateTime }}</span>
@@ -75,7 +75,7 @@
     <!-- Footer -->
     <footer class="footer">
       <div class="container">
-        <p>知枢热榜 · 实时聚合全网热点</p>
+        <p>知枢·看点 · 实时聚合全网热点</p>
       </div>
     </footer>
   </div>
@@ -89,6 +89,16 @@ const API_BASE = '/api/hot'
 // 暗黑模式
 const isDark = ref(false)
 
+// 函数定义必须在使用前
+const updateTheme = () => {
+  localStorage.setItem('darkMode', isDark.value)
+  document.documentElement.classList.toggle('dark', isDark.value)
+}
+
+const toggleDark = () => {
+  isDark.value = !isDark.value
+}
+
 onMounted(() => {
   const saved = localStorage.getItem('darkMode')
   if (saved) {
@@ -100,15 +110,6 @@ onMounted(() => {
 })
 
 watch(isDark, updateTheme)
-
-const updateTheme = () => {
-  localStorage.setItem('darkMode', isDark.value)
-  document.documentElement.classList.toggle('dark', isDark.value)
-}
-
-const toggleDark = () => {
-  isDark.value = !isDark.value
-}
 
 // 分类
 const categories = ref([
@@ -150,6 +151,7 @@ const allSources = [
 const sources = ref(allSources)
 const currentCategory = ref('all')
 const updateTime = ref('')
+const loadingCount = ref(0)
 
 // 当前分类的数据源
 const currentSources = computed(() => {
@@ -164,6 +166,8 @@ const loadAllData = async () => {
   const time = new Date()
   updateTime.value = time.getHours() + ':' + String(time.getMinutes()).padStart(2, '0')
   
+  loadingCount.value = sources.value.length
+  
   // 并行加载所有数据
   await Promise.all(
     sources.value.map(async (source) => {
@@ -175,6 +179,8 @@ const loadAllData = async () => {
         }
       } catch (e) {
         console.error(`加载 ${source.name} 失败:`, e)
+      } finally {
+        loadingCount.value--
       }
     })
   )

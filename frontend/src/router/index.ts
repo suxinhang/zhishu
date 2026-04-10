@@ -8,7 +8,7 @@ const router = createRouter({
       path: '/',
       name: 'Portal',
       component: () => import('../views/Portal.vue'),
-      meta: { title: '知枢 - 智能体聚合平台' }
+      meta: { title: '知枢 · 知识聚合平台' }
     },
     
     // 知枢智能体平台
@@ -16,19 +16,19 @@ const router = createRouter({
       path: '/agents',
       name: 'AgentsHome',
       component: () => import('../views/AgentsHome.vue'),
-      meta: { title: '智能体 - 知枢' }
+      meta: { title: '识客 - 知枢' }
     },
     {
       path: '/agents/category',
       name: 'AgentsCategory',
       component: () => import('../views/AgentsCategory.vue'),
-      meta: { title: '分类 - 知枢' }
+      meta: { title: '分类 - 知枢·识客' }
     },
+    // 详情页已删除（2026-04-10 决策：点击卡片直接对话）
+    // 旧链接重定向到对话页
     {
       path: '/agents/:id',
-      name: 'AgentDetail',
-      component: () => import('../views/AgentDetail.vue'),
-      meta: { title: '智能体详情 - 知枢' }
+      redirect: to => `/chat/${to.params.id}`
     },
     {
       path: '/chat/:id',
@@ -42,19 +42,19 @@ const router = createRouter({
       path: '/tgmeng',
       name: 'TgmengHome',
       component: () => import('../views/TgmengHome.vue'),
-      meta: { title: '知枢热榜' }
+      meta: { title: '知枢·看点' }
     },
     {
       path: '/tgmeng/category/:id',
       name: 'TgmengCategory',
       component: () => import('../views/TgmengCategory.vue'),
-      meta: { title: '分类 - 知枢热榜' }
+      meta: { title: '分类 - 知枢·看点' }
     },
     {
       path: '/tgmeng/topic/:id',
       name: 'TgmengTopic',
       component: () => import('../views/TgmengTopic.vue'),
-      meta: { title: '热点详情 - 知枢热榜' }
+      meta: { title: '热点详情 - 知枢·看点' }
     },
     
     // 404
