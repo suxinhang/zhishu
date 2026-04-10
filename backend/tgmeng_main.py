@@ -223,6 +223,81 @@ def search_topics(q: str, category: int = None):
         "sugar_index": round(t.sugar_index, 1)
     } for t in topics]
 
+# AI 热点解读接口
+@app.get("/api/topics/{topic_id}/interpret")
+async def interpret_topic(topic_id: int):
+    """AI 解读热点事件"""
+    db = SessionLocal()
+    topic = db.query(HotTopic).filter(HotTopic.id == topic_id).first()
+    if not topic:
+        db.close()
+        return {"error": "Topic not found"}
+    
+    title = topic.title
+    source = topic.source
+    db.close()
+    
+    # 调用 DeepSeek API 生成解读
+    prompt = f"""请对以下热点事件进行深度分析，以JSON格式返回：
+
+热点标题：{title}
+数据来源：{source}
+
+请返回以下内容（纯JSON，不要markdown包裹）：
+{{
+  "summary": "事件摘要（2-3句话概括核心）",
+  "key_points": ["观点1", "观点2", "观点3"],
+  "impact": "影响分析（趋势预测和社会影响）",
+  "related_topics": ["相关话题1", "相关话题2"]
+}}
+"""
+    
+    try:
+        import httpx
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
+                "https://api.deepseek.com/v1/chat/completions",
+                headers={
+                    "Authorization": f"Bearer sk-dac9fe3ee5414ff5bd8bcbecd4456617",
+                    "Content-Type": "application/json"
+                },
+                json={
+                    "model": "deepseek-chat",
+                    "messages": [{"role": "user", "content": prompt}],
+                    "temperature": 0.7,
+                    "max_tokens": 1000
+                },
+                timeout=30.0
+            )
+            
+            if response.status_code == 200:
+                data = response.json()
+                content = data["choices"][0]["message"]["content"]
+                
+                # 尝试解析 JSON
+                import json
+                try:
+                    # 清理可能的 markdown 包裹
+                    if content.startswith("```"):
+                        content = content.split("```")[1]
+                        if content.startswith("json"):
+                            content = content[4:]
+                    result = json.loads(content.strip())
+                except:
+                    # 如果解析失败，返回原始内容
+                    result = {
+                        "summary": content,
+                        "key_points": [],
+                        "impact": "",
+                        "related_topics": []
+                    }
+                
+                return {"success": True, "data": result}
+            else:
+                return {"success": False, "error": "API 调用失败"}
+    except Exception as e:
+        return {"success": False, "error": str(e)}
+
 @app.get("/")
 def root():
     return {"message": "糖果梦热榜 API", "docs": "/docs"}
