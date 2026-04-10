@@ -23,10 +23,7 @@
             </svg>
             <span class="logo-text">知枢</span>
           </a>
-          <div class="nav-links">
-            <a href="/agents">匠人</a>
-            <a href="/tgmeng">看点</a>
-          </div>
+          <!-- 简洁导航：右侧两个产品入口 -->
           <div class="nav-actions">
             <button @click="toggleDark" class="dark-toggle" :title="isDark ? '切换亮色模式' : '切换暗黑模式'">
               <svg v-if="isDark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
