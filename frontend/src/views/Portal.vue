@@ -53,7 +53,7 @@
             <span class="highlight">新可能</span>
           </h1>
           <p class="hero-desc">
-            知枢是知识聚合平台，识客帮你对话各领域达人，看点帮你追踪全网热点。
+            知枢是知识聚合平台，匠人帮你对话各领域专家，看点帮你追踪全网热点。
           </p>
           <div class="hero-actions">
             <a href="/agents" class="btn-large btn-primary">
@@ -131,7 +131,7 @@
                 <path d="M14 34c0-4 4-7 10-7s10 3 10 7" stroke="#4F46E5" stroke-width="2" stroke-linecap="round"/>
               </svg>
             </div>
-            <h3>知枢·识客</h3>
+            <h3>知枢·匠人 🛠️</h3>
             <p>发现、对话各领域知识达人</p>
             <div class="card-arrow">
               <svg width="20" height="20" viewBox="0 0 20 20" fill="none">

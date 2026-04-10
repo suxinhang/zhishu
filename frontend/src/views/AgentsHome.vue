@@ -20,7 +20,7 @@
             <span class="logo-text">知枢</span>
           </a>
           <div class="nav-tabs">
-            <span class="active">识客</span>
+            <span class="active">匠人</span>
             <a href="/tgmeng">热榜</a>
           </div>
           <button @click="toggleDark" class="dark-toggle" :title="isDark ? '切换亮色模式' : '切换暗黑模式'">

@@ -16,13 +16,13 @@ const router = createRouter({
       path: '/agents',
       name: 'AgentsHome',
       component: () => import('../views/AgentsHome.vue'),
-      meta: { title: '识客 - 知枢' }
+      meta: { title: '匠人 - 知枢' }
     },
     {
       path: '/agents/category',
       name: 'AgentsCategory',
       component: () => import('../views/AgentsCategory.vue'),
-      meta: { title: '分类 - 知枢·识客' }
+      meta: { title: '分类 - 知枢·匠人' }
     },
     // 详情页已删除（2026-04-10 决策：点击卡片直接对话）
     // 旧链接重定向到对话页

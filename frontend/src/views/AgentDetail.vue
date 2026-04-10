@@ -104,7 +104,7 @@
       <!-- 评分区域 -->
       <div class="mt-8 bg-white rounded-xl shadow-card p-6">
         <h3 class="font-semibold text-slate-800 mb-4 flex items-center gap-2">
-          <span>⭐</span> 为这位识客评分
+          <span>⭐</span> 为这位匠人评分
         </h3>
         <div class="flex items-center gap-2">
           <button 
@@ -120,7 +120,7 @@
           </button>
         </div>
         <p class="text-sm text-slate-500 mt-3">
-          你的评分将帮助其他用户找到更好的识客
+          你的评分将帮助其他用户找到更好的匠人
         </p>
       </div>
     </div>
