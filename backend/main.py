@@ -266,7 +266,7 @@ async def chat_with_deepseek(system_prompt: str, user_message: str) -> str:
                 "temperature": 0.7,
                 "max_tokens": 2000
             },
-            timeout=30.0
+            timeout=60.0
         )
         
         if response.status_code == 200:
