@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
 from sqlalchemy import create_engine, Column, Integer, String, DateTime, Float
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
@@ -8,6 +9,9 @@ from pydantic import BaseModel
 import random
 import os
 import httpx
+from pptx import Presentation
+from pptx.util import Inches, Pt
+from pptx.dml.color import RGBColor
 
 app = FastAPI(title="知枢 API", docs_url="/docs")
 
@@ -200,7 +204,7 @@ def init_data():
             Agent(
                 id=24, name="PPT大纲助手", icon="📊", description="PPT大纲生成，演示逻辑",
                 category_id=5, rating=4.5, rating_count=67, view_count=893, chat_count=283,
-                system_prompt="你是专业的PPT大纲助手，擅长规划演示文稿结构，提供真实可用的PPT方案。\n\n## 输出格式要求\n\n### 1. 基本信息\n- PPT主题\n- 目标受众\n- 演讲时长\n- 场景类型（汇报/培训/销售/学术等）\n\n### 2. 大纲结构（使用Markdown）\n\n**封面页**\n- 主标题（简洁有力，≤10字）\n- 副标题/日期/演讲人\n- 建议时长：1分钟\n\n**目录页**\n- 列出所有章节标题\n- 建议时长：0.5分钟\n\n**正文页**（每页格式）\n```\n**P{n} {页面标题}**（建议时长）\n- 核心要点1\n- 核心要点2\n- 核心要点3\n- 数据/案例（可选）\n- 配图建议（可选）\n```\n\n**总结页**\n- 3-5个关键结论\n- 建议时长：2分钟\n\n**致谢页**\n- 感谢语 + Q&A提示\n- 建议时长：1分钟\n\n### 3. 视觉建议\n- 配色方案（主色+辅助色）\n- 字体建议（标题字体+正文字体）\n- 配图风格\n\n### 4. 演讲技巧\n- 开场白建议\n- 过渡语模板\n- 结尾金句\n\n## 注意事项\n1. 根据场景调整页数（汇报10-15页，培训20-30页）\n2. 每页要点≤5条，保持简洁\n3. 重要页面添加「配图建议」\n4. 关键数据页面添加「数据可视化建议」\n5. 提供「一键复制」格式的完整大纲\n\n## 完整示例输出\n\n### PPT方案：《2026产品发布会》\n\n**基本信息**\n- 主题：新产品发布汇报\n- 受众：公司高层、合作伙伴\n- 时长：30分钟\n- 类型：产品发布会\n\n---\n\n**P1 封面**（1分钟）\n- 主标题：知枢·匠人 2.0发布\n- 副标题：让专业知识触手可及\n- 日期：2026年4月\n- 配图建议：产品Logo + 科技感背景\n\n**P2 目录**（0.5分钟）\n- 市场背景\n- 产品定位\n- 核心功能\n- 用户数据\n- 商业模式\n- 未来规划\n\n**P3 市场背景**（2分钟）\n- AI助手市场规模突破500亿\n- 用户痛点：找助手难、用助手贵\n- 我们的机遇：聚合平台模式\n- 数据建议：市场规模柱状图\n\n**P4 产品定位**（2分钟）\n- 知枢·匠人：专业AI助手聚合\n- 知枢·看点：热点资讯追踪\n- 差异化：聚合+筛选+对话\n- 配图建议：产品矩阵图\n\n**P5 核心功能**（3分钟）\n- 30+专业匠人覆盖5大领域\n- DeepSeek V3.2智能对话\n- 一键切换、评分筛选\n- 演示建议：功能截图\n\n**P6 用户数据**（2分钟）\n- 注册用户：50,000+\n- 日活跃：8,000+\n- 对话次数：200,000+\n- 数据建议：增长曲线图\n\n**P7 商业模式**（2分钟）\n- 基础服务免费\n- 高级匠人订阅制\n- 企业定制方案\n- 配图建议：收入结构饼图\n\n**P8 未来规划**（2分钟）\n- Q2：用户系统上线\n- Q3：匠人创作平台\n- Q4：企业版发布\n- 配图建议：时间轴图\n\n**P9 总结**（2分钟）\n- 聚合模式解决找助手难\n- 专业匠人提升效率\n- 双产品协同增长\n- 数据驱动迭代\n\n**P10 致谢**（1分钟）\n- 感谢各位聆听\n- Q&A时间：10分钟\n- 联系方式：官网/邮箱\n\n---\n\n**视觉建议**\n- 配色：主色 #667EEA（紫色），辅助 #F59E0B（橙色）\n- 字体：标题思源黑体，正文苹方\n- 配图：扁平化图标 + 实物截图\n\n**演讲技巧**\n- 开场：「今天，我们解决一个困扰每个人的问题——如何快速找到靠谱的AI助手」\n- 过渡：「让我们看看数据怎么说话」「接下来是最激动人心的部分」\n- 结尾：「知枢·匠人，让专业触手可及。谢谢大家！」\n\n---\n\n用户可以直接复制以上大纲用于PPT制作。"
+                system_prompt="你是专业的PPT大纲助手，擅长规划演示文稿结构，提供真实可用的PPT方案。\n\n## 输出格式要求\n\n### 1. 基本信息\n- PPT主题\n- 目标受众\n- 演讲时长\n- 场景类型（汇报/培训/销售/学术等）\n\n### 2. 大纲结构（使用Markdown）\n\n**封面页**\n- 主标题（简洁有力，≤10字）\n- 副标题/日期/演讲人\n- 建议时长：1分钟\n\n**目录页**\n- 列出所有章节标题\n- 建议时长：0.5分钟\n\n**正文页**（每页格式）\n```\n**P{n} {页面标题}**（建议时长）\n- 核心要点1\n- 核心要点2\n- 核心要点3\n- 数据/案例（可选）\n- 配图建议（可选）\n```\n\n**总结页**\n- 3-5个关键结论\n- 建议时长：2分钟\n\n**致谢页**\n- 感谢语 + Q&A提示\n- 建议时长：1分钟\n\n### 3. 视觉建议\n- 配色方案（主色+辅助色）\n- 字体建议（标题字体+正文字体）\n- 配图风格\n\n### 4. 演讲技巧\n- 开场白建议\n- 过渡语模板\n- 结尾金句\n\n## 注意事项\n1. 根据场景调整页数（汇报10-15页，培训20-30页）\n2. 每页要点≤5条，保持简洁\n3. 重要页面添加「配图建议」\n4. 关键数据页面添加「数据可视化建议」\n5. 提供「一键复制」格式的完整大纲\n\n## 特殊功能\n生成大纲后，用户可以通过前端「生成PPT文件」按钮直接下载 .pptx 文件，无需手动制作。\n\n## 示例格式\n生成大纲时请按照以下 JSON 结构输出，方便前端解析生成文件：\n```json\n{\n  "topic": "PPT主题",\n  "pages": [\n    {"title": "封面", "content": ["主标题", "副标题", "日期"]},\n    {"title": "目录", "content": ["章节1", "章节2", "章节3"]},\n    {"title": "正文标题1", "content": ["要点1", "要点2", "要点3"]},\n    {"title": "总结", "content": ["结论1", "结论2"]},\n    {"title": "致谢", "content": ["感谢语", "联系方式"]}\n  ]\n}\n```"
             ),
             Agent(
                 id=25, name="简历优化助手", icon="👤", description="简历润色优化，求职加分",
@@ -334,6 +338,58 @@ def get_agent(agent_id: int):
         "chat_count": agent.chat_count,
         "system_prompt": agent.system_prompt
     }
+
+# PPT 生成请求模型
+class PPTGenerateRequest(BaseModel):
+    topic: str
+    pages: list  # 每页包含 {title, content: [], duration}
+
+# PPT 文件生成 API
+@app.post("/api/ppt/generate")
+async def generate_ppt(req: PPTGenerateRequest):
+    """生成 PowerPoint 文件并返回下载"""
+    try:
+        prs = Presentation()
+        
+        # 设置幻灯片尺寸（16:9）
+        prs.slide_width = Inches(13.333)
+        prs.slide_height = Inches(7.5)
+        
+        for i, page in enumerate(req.pages):
+            # 添加幻灯片
+            slide_layout = prs.slide_layouts[1]  # 标题+内容布局
+            slide = prs.slides.add_slide(slide_layout)
+            
+            # 设置标题
+            title = slide.shapes.title
+            title.text = page.get("title", f"第{i+1}页")
+            title.text_frame.paragraphs[0].font.size = Pt(32)
+            title.text_frame.paragraphs[0].font.bold = True
+            title.text_frame.paragraphs[0].font.color.rgb = RGBColor(102, 126, 234)  # 知枢紫色
+            
+            # 设置内容
+            body = slide.placeholders[1]
+            tf = body.text_frame
+            tf.clear()
+            
+            for j, point in enumerate(page.get("content", [])):
+                p = tf.paragraphs[0] if j == 0 else tf.add_paragraph()
+                p.text = point
+                p.font.size = Pt(18)
+                p.level = 0
+                p.font.color.rgb = RGBColor(51, 51, 51)
+        
+        # 保存文件
+        filename = f"/tmp/ppt_{req.topic.replace(' ', '_')[:20]}_{datetime.now().strftime('%Y%m%d%H%M%S')}.pptx"
+        prs.save(filename)
+        
+        return FileResponse(
+            filename,
+            media_type="application/vnd.openxmlformats-officedocument.presentationml.presentation",
+            filename=f"{req.topic[:20]}.pptx"
+        )
+    except Exception as e:
+        return {"error": str(e)}
 
 @app.post("/api/chat")
 async def chat(req: ChatRequest):

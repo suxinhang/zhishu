@@ -13,15 +13,7 @@
           <span class="agent-icon">{{ agent.icon }}</span>
           <span class="agent-name">{{ agent.name }}</span>
         </div>
-        <button @click="toggleDark" class="dark-toggle" :title="isDark ? '切换亮色模式' : '切换暗黑模式'">
-          <svg v-if="isDark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="5"/>
-            <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
-          </svg>
-          <svg v-else viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>
-          </svg>
-        </button>
+        <DarkModeToggle />
       </div>
     </header>
 
@@ -49,9 +41,16 @@
           <!-- 打字机效果 -->
           <div v-if="typingText" class="message agent">
             <div class="message-content">
-              <div class="markdown-body" v-html="renderMarkdown(typingText)"></div>
+              <div class="markdown-body" v-html="renderMarkdown(typingText)"}></div>
               <span class="typing-cursor">▌</span>
             </div>
+          </div>
+          
+          <!-- PPT生成按钮（仅PPT大纲助手） -->
+          <div v-if="pptData && agent && agent.id === 24" class="ppt-action">
+            <button @click="generatePPT" class="btn-ppt">
+              📊 下载 PPT 文件 (.pptx)
+            </button>
           </div>
           
           <div v-if="loading && !typingText" class="message agent">
@@ -95,9 +94,10 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch, nextTick } from 'vue'
+import { ref, onMounted, nextTick } from 'vue'
 import { useRoute } from 'vue-router'
 import { marked } from 'marked'
+import DarkModeToggle from '@/components/DarkModeToggle.vue'
 
 // 配置 marked
 marked.setOptions({
@@ -106,9 +106,6 @@ marked.setOptions({
 })
 
 const route = useRoute()
-
-// 暗黑模式
-const isDark = ref(false)
 
 // Enter键模式
 const enterToSend = ref(true)
@@ -120,15 +117,6 @@ const typingTimer = ref(null)
 // Markdown渲染
 const renderMarkdown = (text) => {
   return marked.parse(text || '')
-}
-
-const updateTheme = () => {
-  localStorage.setItem('darkMode', isDark.value)
-  document.documentElement.classList.toggle('dark', isDark.value)
-}
-
-const toggleDark = () => {
-  isDark.value = !isDark.value
 }
 
 const toggleEnterMode = () => {
@@ -172,19 +160,16 @@ const typeWriter = (text, speed = 30) => {
       messages.value.push({ role: 'agent', content: text })
       typingText.value = ''
       loading.value = false
+      // 尝试解析PPT JSON（仅当agent_id为24时）
+      lastResponse.value = text
+      if (agent.value && agent.value.id === 24) {
+        pptData.value = parsePPTJson(text)
+      }
     }
   }, speed)
 }
 
 onMounted(() => {
-  const saved = localStorage.getItem('darkMode')
-  if (saved) {
-    isDark.value = saved === 'true'
-  } else {
-    isDark.value = window.matchMedia('(prefers-color-scheme: dark)').matches
-  }
-  updateTheme()
-  
   const savedEnterMode = localStorage.getItem('enterToSend')
   if (savedEnterMode !== null) {
     enterToSend.value = savedEnterMode === 'true'
@@ -193,13 +178,56 @@ onMounted(() => {
   loadAgent()
 })
 
-watch(isDark, updateTheme)
-
 const agent = ref(null)
 const messages = ref([])
 const inputText = ref('')
 const loading = ref(false)
 const messagesRef = ref(null)
+const pptData = ref(null)  // 存储解析后的PPT JSON数据
+const lastResponse = ref('')  // 存储最后一条AI回复
+
+// 尝试解析PPT JSON结构
+const parsePPTJson = (text) => {
+  try {
+    // 尝试从文本中提取JSON
+    const jsonMatch = text.match(/```json\s*([\s\S]*?)\s*```/)
+    if (jsonMatch) {
+      return JSON.parse(jsonMatch[1])
+    }
+    // 尝试直接解析
+    const directJson = JSON.parse(text)
+    if (directJson.topic && directJson.pages) {
+      return directJson
+    }
+  } catch (e) {
+    // 解析失败，返回null
+  }
+  return null
+}
+
+// 生成PPT文件
+const generatePPT = async () => {
+  if (!pptData.value) return
+  
+  try {
+    const res = await fetch('/api/ppt/generate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(pptData.value)
+    })
+    
+    // 下载文件
+    const blob = await res.blob()
+    const url = window.URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `${pptData.value.topic || 'PPT'}.pptx`
+    a.click()
+    window.URL.revokeObjectURL(url)
+  } catch (e) {
+    alert('生成PPT失败，请稍后再试')
+  }
+}
 
 const loadAgent = async () => {
   const res = await fetch(`/api/agents/${route.params.id}`)
@@ -530,5 +558,35 @@ button:hover:not(:disabled) {
 button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+/* PPT生成按钮 */
+.ppt-action {
+  display: flex;
+  justify-content: center;
+  padding: 20px;
+  margin-top: 10px;
+}
+
+.btn-ppt {
+  background: linear-gradient(135deg, #667EEA 0%, #764BA2 100%);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+.btn-ppt:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
+.dark .btn-ppt {
+  background: linear-gradient(135deg, #667EEA 0%, #9333EA 100%);
 }
 </style>
